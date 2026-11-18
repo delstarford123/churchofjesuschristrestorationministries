@@ -52,7 +52,7 @@ CHURCH_KB = [
             "• **Pastoral Team:** Available for spiritual counsel, prayer, and home visits.\n"
             "• **Deacons Ministry:** Community welfare, benevolent needs, and ushering.\n"
             "• **Executive Directors:** Stewardship Kitty governance and financial administration.\n"
-            "• **App Support:** Developed & Maintained by Delstarford Works."
+            "• **Sanctuary Secretariat:** The Church of Jesus Christ Restoration Ministry Digital Office."
         )
     }
 ]

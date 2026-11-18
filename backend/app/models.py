@@ -438,7 +438,7 @@ class CommunityProject(db.Model):
     target_budget = db.Column(db.Float, nullable=False)
     raised_budget = db.Column(db.Float, default=0.0)
     beneficiaries_reached = db.Column(db.Integer, default=0)
-    cbo_partner = db.Column(db.String(120), default='FARD Community Based Organization')
+    cbo_partner = db.Column(db.String(120), default='RLDS Benevolent Welfare Department')
     status = db.Column(db.String(50), default='In Progress')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 

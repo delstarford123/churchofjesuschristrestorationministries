@@ -126,7 +126,7 @@ def seed_firestore():
         {
             "id": "FARD-YOUTH-02",
             "title": "Youth Digital Literacy & Tech Hub",
-            "partner_cbo": "Delstarford Works & FARD CBO",
+            "partner_cbo": "RLDS Youth Ministry & Benevolent Board",
             "description": "Equipping youth with mobile development, graphic design, and ethical AI skills.",
             "beneficiaries": 120,
             "status": "Recruiting",

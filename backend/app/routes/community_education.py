@@ -124,11 +124,11 @@ def update_milestone(current_user, member_id):
 
 
 # =========================================================================
-# 21. COMMUNITY OUTREACH & CBO PROJECT TRACKER (FARD CBO)
+# 21. COMMUNITY OUTREACH & BENEVOLENT WELFARE TRACKER
 # =========================================================================
 @community_bp.route('/outreach/projects', methods=['GET'])
 def list_community_projects():
-    """Transparency dashboard linking church members to community initiatives (FARD CBO)."""
+    """Transparency dashboard linking church members to benevolent initiatives."""
     projects = CommunityProject.query.order_by(CommunityProject.created_at.desc()).all()
     return jsonify({
         'status': 'success',
@@ -154,7 +154,7 @@ def create_community_project(current_user):
         description=data.get('description', 'Community support program.'),
         target_budget=float(target_budget),
         raised_budget=float(data.get('raised_budget', 0.0)),
-        cbo_partner=data.get('cbo_partner', 'FARD Community Based Organization'),
+        cbo_partner=data.get('cbo_partner', 'RLDS Benevolent Welfare Department'),
         beneficiaries_reached=int(data.get('beneficiaries', 0))
     )
 

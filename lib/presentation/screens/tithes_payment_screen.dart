@@ -458,7 +458,7 @@ class _TithesPaymentScreenState extends State<TithesPaymentScreen> with SingleTi
             ),
             const SizedBox(height: 12),
             const Text(
-              'The Church of Jesus Christ Restoration Ministry • Delstarford Works',
+              'The Church of Jesus Christ Restoration Ministry • Sacred Sanctuary',
               style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500, color: textSlateGrey),
             ),
           ],
@@ -1009,10 +1009,10 @@ class _TithesPaymentScreenState extends State<TithesPaymentScreen> with SingleTi
               ),
               const SizedBox(height: 24),
 
-              // 7. DEVELOPER FOOTER BRANDING
+              // 7. CHURCH FOOTER
               const Center(
                 child: Text(
-                  'The Church of Jesus Christ Restoration Ministry (RLDS Church)\nEngineered with Sacred Modernism by Delstarford Works',
+                  'The Church of Jesus Christ Restoration Ministry (RLDS Church)\nFaith, Consecration & Divine Stewardship',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,

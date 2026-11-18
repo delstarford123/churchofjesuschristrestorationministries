@@ -32,7 +32,7 @@ def get_digital_membership_card(current_user, member_id):
 
     card_data = {
         'ministry': "The Church of Jesus Christ Restoration Ministry",
-        'tagline': "Digital Sanctuary Card • Delstarford Works",
+        'tagline': "Digital Sanctuary Card • RLDS Church",
         'member_id': user.member_id,
         'full_name': user.full_name,
         'role': user.role,

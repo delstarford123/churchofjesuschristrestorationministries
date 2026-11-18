@@ -8,6 +8,11 @@ import 'package:rlds_church_app/presentation/screens/digital_card_screen.dart';
 import 'package:rlds_church_app/presentation/screens/community_outreach_screen.dart';
 import 'package:rlds_church_app/presentation/screens/church_life_screen.dart';
 import 'package:rlds_church_app/presentation/screens/scripture_reader_view.dart';
+import 'package:rlds_church_app/presentation/screens/dashboards/super_admin_dashboard.dart';
+import 'package:rlds_church_app/presentation/screens/dashboards/executive_dashboard.dart';
+import 'package:rlds_church_app/core/localization/church_translations.dart';
+import 'package:rlds_church_app/core/theme/theme_provider.dart';
+import 'package:rlds_church_app/data/services/church_auth_session.dart';
 import 'package:rlds_church_app/data/repositories/church_sync_repository.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_bloc.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_event.dart';
@@ -92,13 +97,15 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withAlpha(25),
-                          shape: BoxShape.circle,
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/img/App icon.jpg',
+                          width: 48,
+                          height: 48,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(Icons.church_rounded, size: 36, color: Color(0xFFD97706)),
                         ),
-                        child: const Icon(Icons.church_rounded, size: 36, color: Color(0xFFD97706)),
                       ),
                       const SizedBox(height: 10),
                       const Text(
@@ -106,12 +113,31 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const Text(
-                        'Digital Sanctuary • Delstarford Works',
+                        'Digital Sanctuary • Restoration Ministry',
                         style: TextStyle(fontSize: 11, color: Colors.white70),
                       ),
                     ],
                   ),
                 ),
+                ListTile(
+                  leading: const Icon(Icons.admin_panel_settings_rounded, color: Colors.purple),
+                  title: const Text('Super Admin Portal', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Executive Appointments & System Oversight', style: TextStyle(fontSize: 11)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const SuperAdminDashboard()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.shield_rounded, color: Color(0xFFD97706)),
+                  title: const Text('Executive Council Portal', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Kitty Approvals, Events & Pastoral Care', style: TextStyle(fontSize: 11)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ExecutiveDashboard()));
+                  },
+                ),
+                const Divider(),
                 ListTile(
                   leading: const Icon(Icons.volunteer_activism_rounded, color: Color(0xFF1E3A8A)),
                   title: const Text('Tithes & Offerings (M-Pesa)', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -149,8 +175,8 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
                 ),
                 ListTile(
                   leading: const Icon(Icons.handshake_rounded, color: Color(0xFF16A34A)),
-                  title: const Text('Community Outreach & CBO'),
-                  subtitle: const Text('FARD CBO Initiatives & Sunday School', style: TextStyle(fontSize: 11)),
+                  title: const Text('Community Outreach & Welfare'),
+                  subtitle: const Text('Church Welfare & Sunday School', style: TextStyle(fontSize: 11)),
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const CommunityOutreachScreen()));
@@ -248,7 +274,7 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
               unselectedLabelColor: Colors.white60,
               tabs: const [
                 Tab(icon: Icon(Icons.volunteer_activism_rounded), text: 'Tithe'),
-                Tab(icon: Icon(Icons.account_balance_wallet_rounded), text: 'Kitty Loan'),
+                Tab(icon: Icon(Icons.account_balance_wallet_rounded), text: 'Stewardship Kitty'),
                 Tab(icon: Icon(Icons.cloud_sync_rounded), text: 'Queue'),
                 Tab(icon: Icon(Icons.chat_bubble_outline_rounded), text: 'Support'),
               ],
@@ -282,8 +308,8 @@ class _TitheFormView extends StatefulWidget {
 
 class _TitheFormViewState extends State<_TitheFormView> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController(text: 'John Doe');
-  final _memberIdController = TextEditingController(text: 'RLDS-10023');
+  final _nameController = TextEditingController(text: ChurchMemberSession.instance.fullName);
+  final _memberIdController = TextEditingController(text: ChurchMemberSession.instance.memberId);
   final _amountController = TextEditingController();
   final _receiptController = TextEditingController();
   final _emailController = TextEditingController();
@@ -465,8 +491,8 @@ class _LoanFormView extends StatefulWidget {
 
 class _LoanFormViewState extends State<_LoanFormView> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController(text: 'John Doe');
-  final _memberIdController = TextEditingController(text: 'RLDS-10023');
+  final _nameController = TextEditingController(text: ChurchMemberSession.instance.fullName);
+  final _memberIdController = TextEditingController(text: ChurchMemberSession.instance.memberId);
   final _amountController = TextEditingController();
   final _periodController = TextEditingController(text: '6');
   final _guarantorController = TextEditingController();

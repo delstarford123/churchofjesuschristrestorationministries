@@ -8,8 +8,8 @@ load_dotenv()
 class Config:
     """Base configuration for RLDS Church App Backend."""
     
-    SECRET_KEY = os.getenv('SECRET_KEY', 'rlds-church-restoration-ministry-secret-key-delstarford-works-2026-prod-secure')
-    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'rlds-church-restoration-ministry-jwt-token-secret-key-delstarford-2026-secure-32bytes+')
+    SECRET_KEY = os.getenv('SECRET_KEY', 'rlds-church-restoration-ministry-secret-key-sacred-sanctuary-2026-prod-secure')
+    JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'rlds-church-restoration-ministry-jwt-token-secret-key-sanctuary-2026-secure-32bytes+')
     JWT_EXPIRATION_HOURS = int(os.getenv('JWT_EXPIRATION_HOURS', '72'))
     
     # Database Configuration
@@ -53,5 +53,5 @@ class Config:
     # Church Administration
     CHURCH_NAME = "The Church of Jesus Christ Restoration Ministry"
     CHURCH_ACRONYM = "RLDS Church"
-    DEVELOPED_BY = "Delstarford Works"
+    DEVELOPED_BY = "The Church of Jesus Christ Restoration Ministry"
     ADMIN_EMAIL = os.getenv('ADMIN_EMAIL', 'admin@rldschurch.org')

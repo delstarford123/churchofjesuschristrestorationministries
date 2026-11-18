@@ -68,7 +68,7 @@ class RLDSChurchBackendTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.get_json()
         self.assertEqual(data['status'], 'healthy')
-        self.assertIn('Delstarford Works', data['developer'])
+        self.assertIn('Restoration Ministry', data['developer'])
 
     def test_api_root(self):
         res = self.client.get('/')

@@ -4,20 +4,18 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:rlds_church_app/data/repositories/church_sync_repository.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_bloc.dart';
 import 'package:rlds_church_app/presentation/screens/church_splash_screen.dart';
+import 'package:rlds_church_app/core/theme/theme_provider.dart';
 
 void main() async {
-  // Ensure Flutter binding is initialized before asynchronous startup tasks
   WidgetsFlutterBinding.ensureInitialized();
 
-  // 1. Initialize Hive for local offline-first storage and caching
+  // Initialize Hive for local offline-first storage and caching
   await Hive.initFlutter();
 
-  // Open Hive boxes to store offline transaction queues, user sessions, and cached content
   await Hive.openBox('offline_queue');
   await Hive.openBox('auth_cache');
   await Hive.openBox('church_content_cache');
 
-  // Initialize repository
   final syncRepository = ChurchSyncRepository();
 
   runApp(RLDSChurchApp(syncRepository: syncRepository));
@@ -40,22 +38,46 @@ class RLDSChurchApp extends StatelessWidget {
             create: (context) => ChurchSyncBloc(syncRepository),
           ),
         ],
-        child: MaterialApp(
-          title: 'RLDS Church Restoration Ministry',
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF1E3A8A), // Deep liturgical blue
-              secondary: const Color(0xFFD97706), // Stewardship gold accent
-            ),
-            scaffoldBackgroundColor: const Color(0xFFF9FAFB),
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Color(0xFF1E3A8A),
-              foregroundColor: Colors.white,
-            ),
-          ),
-          home: const ChurchSplashScreen(),
+        child: ListenableBuilder(
+          listenable: AppStateNotifier.instance,
+          builder: (context, _) {
+            return MaterialApp(
+              title: 'The Church of Jesus Christ Restoration Ministry',
+              debugShowCheckedModeBanner: false,
+              themeMode: AppStateNotifier.instance.themeMode,
+              theme: ThemeData(
+                useMaterial3: true,
+                brightness: Brightness.light,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: const Color(0xFF1E3A8A), // Deep liturgical blue
+                  secondary: const Color(0xFFD97706), // Stewardship gold
+                  brightness: Brightness.light,
+                ),
+                scaffoldBackgroundColor: const Color(0xFFF9FAFB),
+                appBarTheme: const AppBarTheme(
+                  backgroundColor: Color(0xFF1E3A8A),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                ),
+              ),
+              darkTheme: ThemeData(
+                useMaterial3: true,
+                brightness: Brightness.dark,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: const Color(0xFF1E3A8A),
+                  secondary: const Color(0xFFF59E0B),
+                  brightness: Brightness.dark,
+                ),
+                scaffoldBackgroundColor: const Color(0xFF0F172A),
+                appBarTheme: const AppBarTheme(
+                  backgroundColor: Color(0xFF1E293B),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                ),
+              ),
+              home: const ChurchSplashScreen(),
+            );
+          },
         ),
       ),
     );

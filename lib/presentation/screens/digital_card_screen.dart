@@ -157,7 +157,7 @@ class _DigitalCardScreenState extends State<DigitalCardScreen> {
                         style: TextStyle(fontSize: 10, color: Colors.white60),
                       ),
                       Text(
-                        'Delstarford Works',
+                        'Restoration Ministry',
                         style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: stewardshipGold),
                       ),
                     ],

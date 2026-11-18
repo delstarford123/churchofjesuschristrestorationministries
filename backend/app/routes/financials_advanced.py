@@ -244,7 +244,7 @@ def get_annual_tax_statement(current_user):
             'grand_total_kes': grand_total
         },
         'transactions_count': len(year_records),
-        'certified_by': "RLDS Treasury Board & Delstarford Works Digital Systems",
+        'certified_by': "RLDS Supreme Treasury Board & Presiding Bishopric",
         'generated_at': datetime.utcnow().isoformat()
     }
 

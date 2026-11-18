@@ -21,7 +21,7 @@ TRANSLATIONS = {
         'events': 'Ratiba na Mikutano',
         'branches': 'Matawi ya Kanisa Kakamega na Kenya',
         'scripture_verse': 'Leteni zaka zote ghalani, ili kuwe na chakula nyumbani mwangu.',
-        'delstarford_works': 'Imeundwa na Delstarford Works'
+        'ministry_credit': 'Imeundwa na Huduma ya Urejesho'
     },
     'en': {
         'app_title': 'The Church of Jesus Christ Restoration Ministry',
@@ -34,7 +34,7 @@ TRANSLATIONS = {
         'events': 'Events & Calendar',
         'branches': 'Church Branch Locator',
         'scripture_verse': 'Bring all the tithes into the storehouse, that there may be food in My house.',
-        'delstarford_works': 'Powered by Delstarford Works'
+        'ministry_credit': 'Restoration Ministry Digital Sanctuary'
     }
 }
 

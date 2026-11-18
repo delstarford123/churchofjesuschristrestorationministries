@@ -1,6 +1,6 @@
 # The Church of Jesus Christ Restoration Ministry (RLDS Church)
 ## Offline-First Backend API & Stewardship Kitty Portal
-**Developed by Delstarford Works**
+**Restoration Ministry Digital Sanctuary**
 
 ---
 
@@ -183,4 +183,4 @@ On initial launch with a new database, a default Super Admin account is provisio
 | `POST` | `/api/v1/chat/message` | AI guidance for registration, giving, kitty rules & services |
 
 ---
-**RLDS Church Restoration Ministry &bull; Powered by Delstarford Works**
+**The Church of Jesus Christ Restoration Ministry &bull; Digital Sanctuary**

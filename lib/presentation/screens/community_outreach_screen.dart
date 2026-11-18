@@ -24,14 +24,14 @@ class _CommunityOutreachScreenState extends State<CommunityOutreachScreen> {
   final List<Map<String, dynamic>> _projects = [
     {
       'name': 'Kakamega Vulnerable Widows Food Security',
-      'cbo': 'FARD Community Based Organization',
+      'cbo': 'RLDS Zion Welfare Department',
       'target': 250000.0,
       'raised': 180000.0,
       'beneficiaries': 85
     },
     {
       'name': 'Youth Carpentry & Electrical Skills Hub',
-      'cbo': 'RLDS Youth Ministry & FARD CBO',
+      'cbo': 'RLDS Youth Ministry & Benevolent Board',
       'target': 400000.0,
       'raised': 220000.0,
       'beneficiaries': 40
@@ -116,7 +116,7 @@ class _CommunityOutreachScreenState extends State<CommunityOutreachScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // 1. CBO PROJECTS TRACKER (FARD CBO)
+            // 1. CHURCH BENEVOLENT WELFARE & OUTREACH
             Card(
               elevation: 1.5,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -138,7 +138,7 @@ class _CommunityOutreachScreenState extends State<CommunityOutreachScreen> {
                     ),
                     const SizedBox(height: 4),
                     const Text(
-                      'Church collaborations with FARD CBO across Kakamega',
+                      'Church benevolent outreach across Western Kenya and Nairobi',
                       style: TextStyle(fontSize: 11.5, color: Color(0xFF6B7280)),
                     ),
                     const SizedBox(height: 14),

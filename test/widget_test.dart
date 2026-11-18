@@ -11,6 +11,6 @@ void main() {
     );
 
     expect(find.textContaining('The Church of Jesus Christ'), findsOneWidget);
-    expect(find.textContaining('Delstarford Works'), findsOneWidget);
+    expect(find.textContaining('Restoration Ministry'), findsWidgets);
   });
 }
