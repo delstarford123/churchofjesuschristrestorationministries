@@ -10,6 +10,7 @@ import 'package:rlds_church_app/presentation/screens/church_life_screen.dart';
 import 'package:rlds_church_app/presentation/screens/scripture_reader_view.dart';
 import 'package:rlds_church_app/presentation/screens/dashboards/super_admin_dashboard.dart';
 import 'package:rlds_church_app/presentation/screens/dashboards/executive_dashboard.dart';
+import 'package:rlds_church_app/presentation/screens/ministry/church_ministry_hub_screen.dart';
 import 'package:rlds_church_app/core/localization/church_translations.dart';
 import 'package:rlds_church_app/core/theme/theme_provider.dart';
 import 'package:rlds_church_app/data/services/church_auth_session.dart';
@@ -135,6 +136,15 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
                   onTap: () {
                     Navigator.pop(context);
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const ExecutiveDashboard()));
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.hub_rounded, color: Color(0xFF16A34A)),
+                  title: const Text('20 Sacred Ministry Portals', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Priesthood, Hymnal, Transparency & Records', style: TextStyle(fontSize: 11)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ChurchMinistryHubScreen()));
                   },
                 ),
                 const Divider(),

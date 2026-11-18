@@ -7,6 +7,7 @@ import 'package:rlds_church_app/presentation/screens/dashboards/executive_dashbo
 import 'package:rlds_church_app/presentation/screens/home_dashboard.dart';
 import 'package:rlds_church_app/presentation/screens/scripture_reader_view.dart';
 import 'package:rlds_church_app/presentation/screens/church_life_screen.dart';
+import 'package:rlds_church_app/presentation/screens/ministry/church_ministry_hub_screen.dart';
 
 class WelcomeLandingScreen extends StatefulWidget {
   const WelcomeLandingScreen({super.key});
@@ -439,6 +440,19 @@ class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 16),
+              Card(
+                elevation: 0,
+                color: const Color(0xFF1E3A8A).withAlpha(15),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                child: ListTile(
+                  leading: const CircleAvatar(backgroundColor: Color(0xFF1E3A8A), child: Icon(Icons.hub_rounded, color: Colors.white, size: 20)),
+                  title: const Text('20 Sacred Ministry & Records Portals', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                  subtitle: const Text('Priesthood, Hymnal, Transparency & Cell Groups', style: TextStyle(fontSize: 11)),
+                  trailing: const Icon(Icons.chevron_right, color: Color(0xFF1E3A8A)),
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChurchMinistryHubScreen())),
+                ),
               ),
             ],
           ),

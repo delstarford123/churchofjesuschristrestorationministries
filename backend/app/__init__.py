@@ -25,6 +25,7 @@ def create_app(config_class=Config):
     from app.routes.governance_admin import governance_bp
     from app.routes.community_education import community_bp
     from app.routes.smart_tech_events import smart_tech_bp
+    from app.routes.ministry_connection import ministry_bp
 
     app.register_blueprint(health_bp)
     app.register_blueprint(auth_bp)
@@ -36,6 +37,7 @@ def create_app(config_class=Config):
     app.register_blueprint(governance_bp)
     app.register_blueprint(community_bp)
     app.register_blueprint(smart_tech_bp)
+    app.register_blueprint(ministry_bp)
 
     # Global Error Handlers
     @app.errorhandler(404)

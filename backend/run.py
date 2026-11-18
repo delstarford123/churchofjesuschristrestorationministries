@@ -1,5 +1,6 @@
-import sys
 import os
+os.environ['DISABLE_SQLALCHEMY_CEXT'] = '1'
+import sys
 
 # Add backend directory to sys.path
 backend_dir = os.path.dirname(os.path.abspath(__file__))

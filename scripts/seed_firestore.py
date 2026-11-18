@@ -109,13 +109,13 @@ def seed_firestore():
         db.collection("announcements").document(a["id"]).set(a, merge=True)
     print(f"-> Seeded {len(announcements)} announcements.")
 
-    # 4. Seed Community Projects (FARD CBO)
+    # 4. Seed Community Projects (RLDS Community Outreach)
     print("Seeding Community Outreach Projects collection...")
     projects = [
         {
-            "id": "FARD-AGRI-01",
-            "title": "FARD CBO Sustainable Agricultural Cooperative",
-            "partner_cbo": "FARD CBO Kenya",
+            "id": "RLDS-AGRI-01",
+            "title": "Restoration Sustainable Agricultural Cooperative",
+            "partner_cbo": "RLDS Agriculture & Welfare Board",
             "description": "Providing certified high-yield seeds and organic fertilizers to Kakamega farming families.",
             "beneficiaries": 350,
             "status": "Active",
@@ -124,7 +124,7 @@ def seed_firestore():
             "created_at": now_iso
         },
         {
-            "id": "FARD-YOUTH-02",
+            "id": "RLDS-YOUTH-02",
             "title": "Youth Digital Literacy & Tech Hub",
             "partner_cbo": "RLDS Youth Ministry & Benevolent Board",
             "description": "Equipping youth with mobile development, graphic design, and ethical AI skills.",

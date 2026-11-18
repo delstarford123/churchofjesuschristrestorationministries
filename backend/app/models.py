@@ -646,3 +646,528 @@ class AuditLog(db.Model):
     details = db.Column(db.Text, nullable=True)
     ip_address = db.Column(db.String(50), nullable=True)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+# =========================================================================
+# 20 HIGH-IMPACT FEATURES FOR DEEPER CHURCH CONNECTION & RECORDS
+# =========================================================================
+
+class PriesthoodLineage(db.Model):
+    """1. Digital Ordination & Priesthood Lineage Tracker."""
+    __tablename__ = 'priesthood_lineages'
+
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.String(50), nullable=False, index=True)
+    minister_name = db.Column(db.String(120), nullable=False)
+    priesthood_office = db.Column(db.String(60), nullable=False) # Deacon, Teacher, Priest, Elder, High Priest, Bishop, Apostle
+    ordained_by = db.Column(db.String(120), nullable=False)
+    ordination_date = db.Column(db.Date, nullable=False)
+    quorum = db.Column(db.String(80), default='Elders Quorum')
+    certificate_number = db.Column(db.String(60), unique=True, nullable=False)
+    lineage_notes = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'member_id': self.member_id,
+            'minister_name': self.minister_name,
+            'priesthood_office': self.priesthood_office,
+            'ordained_by': self.ordained_by,
+            'ordination_date': self.ordination_date.isoformat() if self.ordination_date else None,
+            'quorum': self.quorum,
+            'certificate_number': self.certificate_number,
+            'lineage_notes': self.lineage_notes
+        }
+
+
+class SacramentVisitation(db.Model):
+    """2. Sacrament Service Attendance & Sick Visitation Roster."""
+    __tablename__ = 'sacrament_visitations'
+
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.String(50), nullable=False)
+    member_name = db.Column(db.String(120), nullable=False)
+    home_address = db.Column(db.String(255), nullable=False)
+    visiting_deacon_or_elder = db.Column(db.String(120), nullable=False)
+    visit_date = db.Column(db.DateTime, default=datetime.utcnow)
+    sacrament_administered = db.Column(db.Boolean, default=True)
+    welfare_needs = db.Column(db.Text, nullable=True)
+    prayer_requests = db.Column(db.Text, nullable=True)
+    status = db.Column(db.String(30), default='Completed')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'member_id': self.member_id,
+            'member_name': self.member_name,
+            'home_address': self.home_address,
+            'visiting_deacon_or_elder': self.visiting_deacon_or_elder,
+            'visit_date': self.visit_date.isoformat() if self.visit_date else None,
+            'sacrament_administered': self.sacrament_administered,
+            'welfare_needs': self.welfare_needs,
+            'prayer_requests': self.prayer_requests,
+            'status': self.status
+        }
+
+
+class AnniversaryBlessing(db.Model):
+    """3. Automated Birthday & Baptism Anniversary Blessings."""
+    __tablename__ = 'anniversary_blessings'
+
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.String(50), nullable=False)
+    member_name = db.Column(db.String(120), nullable=False)
+    phone_number = db.Column(db.String(30), nullable=False)
+    anniversary_type = db.Column(db.String(30), nullable=False) # Birthday, Baptism, Ordination, Wedding
+    milestone_date = db.Column(db.Date, nullable=False)
+    blessing_scripture = db.Column(db.String(150), default='Numbers 6:24-26 (IV)')
+    custom_pastoral_message = db.Column(db.Text, nullable=False)
+    sms_status = db.Column(db.String(30), default='Sent')
+    sent_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'member_id': self.member_id,
+            'member_name': self.member_name,
+            'phone_number': self.phone_number,
+            'anniversary_type': self.anniversary_type,
+            'milestone_date': self.milestone_date.isoformat() if self.milestone_date else None,
+            'blessing_scripture': self.blessing_scripture,
+            'custom_pastoral_message': self.custom_pastoral_message,
+            'sms_status': self.sms_status
+        }
+
+
+class HymnalSong(db.Model):
+    """4. Restoration Hymnal with Offline Audio Accompaniment."""
+    __tablename__ = 'hymnal_songs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    hymn_number = db.Column(db.Integer, unique=True, nullable=False)
+    title_en = db.Column(db.String(150), nullable=False)
+    title_sw = db.Column(db.String(150), nullable=False)
+    lyrics_en = db.Column(db.Text, nullable=False)
+    lyrics_sw = db.Column(db.Text, nullable=False)
+    key_signature = db.Column(db.String(20), default='G Major')
+    category = db.Column(db.String(60), default='Zion & Gathering')
+    midi_audio_asset = db.Column(db.String(200), default='assets/audio/hymn_default.mp3')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'hymn_number': self.hymn_number,
+            'title_en': self.title_en,
+            'title_sw': self.title_sw,
+            'lyrics_en': self.lyrics_en,
+            'lyrics_sw': self.lyrics_sw,
+            'key_signature': self.key_signature,
+            'category': self.category,
+            'midi_audio_asset': self.midi_audio_asset
+        }
+
+
+class MarriageRegistry(db.Model):
+    """6. Sacred Vows & Marriage Registry."""
+    __tablename__ = 'marriage_registry'
+
+    id = db.Column(db.Integer, primary_key=True)
+    certificate_number = db.Column(db.String(60), unique=True, nullable=False)
+    groom_name = db.Column(db.String(120), nullable=False)
+    bride_name = db.Column(db.String(120), nullable=False)
+    matrimony_date = db.Column(db.Date, nullable=False)
+    branch_name = db.Column(db.String(100), default='Kakamega Central Cathedral')
+    officiant_elder = db.Column(db.String(120), nullable=False)
+    witness_1 = db.Column(db.String(120), nullable=False)
+    witness_2 = db.Column(db.String(120), nullable=False)
+    counseling_completed = db.Column(db.Boolean, default=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'certificate_number': self.certificate_number,
+            'groom_name': self.groom_name,
+            'bride_name': self.bride_name,
+            'matrimony_date': self.matrimony_date.isoformat() if self.matrimony_date else None,
+            'branch_name': self.branch_name,
+            'officiant_elder': self.officiant_elder,
+            'witness_1': self.witness_1,
+            'witness_2': self.witness_2,
+            'counseling_completed': self.counseling_completed
+        }
+
+
+class SundaySchoolBadge(db.Model):
+    """7. Sunday School Scripture Memorization Badge System."""
+    __tablename__ = 'sunday_school_badges'
+
+    id = db.Column(db.Integer, primary_key=True)
+    child_name = db.Column(db.String(120), nullable=False)
+    parent_id = db.Column(db.String(50), nullable=False)
+    badge_title = db.Column(db.String(100), nullable=False) # e.g. "Enoch's Zion Pioneer", "Nephi's Courage"
+    scripture_verse = db.Column(db.String(150), nullable=False)
+    stars_awarded = db.Column(db.Integer, default=5)
+    awarded_date = db.Column(db.Date, default=datetime.utcnow)
+    teacher_name = db.Column(db.String(120), default='Teacher Dorcas Atieno')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'child_name': self.child_name,
+            'parent_id': self.parent_id,
+            'badge_title': self.badge_title,
+            'scripture_verse': self.scripture_verse,
+            'stars_awarded': self.stars_awarded,
+            'awarded_date': self.awarded_date.isoformat() if self.awarded_date else None,
+            'teacher_name': self.teacher_name
+        }
+
+
+class PrayerRequestWall(db.Model):
+    """8. Direct-to-Pastor Prayer Request Wall (Private & Congregational)."""
+    __tablename__ = 'prayer_requests_wall'
+
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.String(50), nullable=False)
+    requester_name = db.Column(db.String(120), default='Faithful Believer')
+    is_confidential = db.Column(db.Boolean, default=False) # True = Pastors/Elders only, False = Church Wall
+    title = db.Column(db.String(150), nullable=False)
+    request_text = db.Column(db.Text, nullable=False)
+    prayer_count = db.Column(db.Integer, default=1)
+    answered_testimony = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'member_id': self.member_id,
+            'requester_name': 'Anonymous' if self.is_confidential else self.requester_name,
+            'is_confidential': self.is_confidential,
+            'title': self.title,
+            'request_text': self.request_text,
+            'prayer_count': self.prayer_count,
+            'answered_testimony': self.answered_testimony,
+            'created_at': self.created_at.isoformat() if self.created_at else None
+        }
+
+
+class FinancialTransparencyReport(db.Model):
+    """9. Quarterly Ministry Stewardship Financial Transparency Reports."""
+    __tablename__ = 'financial_transparency_reports'
+
+    id = db.Column(db.Integer, primary_key=True)
+    quarter = db.Column(db.String(20), nullable=False) # e.g. "Q3 2026"
+    total_tithes = db.Column(db.Float, nullable=False)
+    benevolence_spent = db.Column(db.Float, nullable=False)
+    evangelism_spent = db.Column(db.Float, nullable=False)
+    sanctuary_building_spent = db.Column(db.Float, nullable=False)
+    stewardship_kitty_reserve = db.Column(db.Float, nullable=False)
+    summary_notes = db.Column(db.Text, nullable=False)
+    published_by = db.Column(db.String(120), default='Presiding Bishopric & Treasury Council')
+    published_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'quarter': self.quarter,
+            'total_tithes': self.total_tithes,
+            'benevolence_spent': self.benevolence_spent,
+            'evangelism_spent': self.evangelism_spent,
+            'sanctuary_building_spent': self.sanctuary_building_spent,
+            'stewardship_kitty_reserve': self.stewardship_kitty_reserve,
+            'summary_notes': self.summary_notes,
+            'published_by': self.published_by,
+            'published_at': self.published_at.isoformat() if self.published_at else None
+        }
+
+
+class EmergencyBenevolenceAlert(db.Model):
+    """10. Emergency Medical & Bereavement Assistance Fund Alerts."""
+    __tablename__ = 'emergency_benevolence_alerts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    case_code = db.Column(db.String(50), unique=True, nullable=False)
+    title = db.Column(db.String(150), nullable=False)
+    cause_type = db.Column(db.String(50), default='Medical Emergency') # Medical, Bereavement, Disaster
+    target_amount = db.Column(db.Float, nullable=False)
+    raised_amount = db.Column(db.Float, default=0.0)
+    description = db.Column(db.Text, nullable=False)
+    deacon_signoff = db.Column(db.String(120), nullable=False)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'case_code': self.case_code,
+            'title': self.title,
+            'cause_type': self.cause_type,
+            'target_amount': self.target_amount,
+            'raised_amount': self.raised_amount,
+            'description': self.description,
+            'deacon_signoff': self.deacon_signoff,
+            'is_active': self.is_active,
+            'progress_percent': round((self.raised_amount / self.target_amount) * 100, 1) if self.target_amount > 0 else 0
+        }
+
+
+class DevotionalPlan(db.Model):
+    """11. Push-Notification Devotional & Daily Fasting Reminders."""
+    __tablename__ = 'devotional_plans'
+
+    id = db.Column(db.Integer, primary_key=True)
+    day_date = db.Column(db.Date, nullable=False, unique=True)
+    title = db.Column(db.String(150), nullable=False)
+    iv_scripture_reference = db.Column(db.String(100), nullable=False)
+    bom_reference = db.Column(db.String(100), nullable=False)
+    pastoral_reflection = db.Column(db.Text, nullable=False)
+    fasting_guideline = db.Column(db.String(255), nullable=True) # e.g. "Wednesday Restoration Fast until 3 PM"
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'day_date': self.day_date.isoformat() if self.day_date else None,
+            'title': self.title,
+            'iv_scripture_reference': self.iv_scripture_reference,
+            'bom_reference': self.bom_reference,
+            'pastoral_reflection': self.pastoral_reflection,
+            'fasting_guideline': self.fasting_guideline
+        }
+
+
+class AssetInventoryTag(db.Model):
+    """12. Church Assets & Sacred Communion Inventory QR Tagging."""
+    __tablename__ = 'asset_inventory_tags'
+
+    id = db.Column(db.Integer, primary_key=True)
+    tag_code = db.Column(db.String(60), unique=True, nullable=False) # QR Code Content
+    item_name = db.Column(db.String(120), nullable=False)
+    category = db.Column(db.String(60), default='Sacred Communion Trays') # Communion, Sound, Instruments, Tents
+    branch_location = db.Column(db.String(100), default='Kakamega Central Cathedral')
+    condition = db.Column(db.String(40), default='Excellent') # Excellent, Good, Service Required
+    last_audited_by = db.Column(db.String(120), default='Deacon Board')
+    last_audited_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'tag_code': self.tag_code,
+            'item_name': self.item_name,
+            'category': self.category,
+            'branch_location': self.branch_location,
+            'condition': self.condition,
+            'last_audited_by': self.last_audited_by,
+            'last_audited_at': self.last_audited_at.isoformat() if self.last_audited_at else None
+        }
+
+
+class BaptismalCertificate(db.Model):
+    """13. Digital Covenant & Baptismal Certificate Generator."""
+    __tablename__ = 'baptismal_certificates'
+
+    id = db.Column(db.Integer, primary_key=True)
+    certificate_hash = db.Column(db.String(80), unique=True, nullable=False)
+    member_id = db.Column(db.String(50), nullable=False)
+    candidate_name = db.Column(db.String(120), nullable=False)
+    baptism_date = db.Column(db.Date, nullable=False)
+    baptizing_elder = db.Column(db.String(120), nullable=False)
+    confirming_elder = db.Column(db.String(120), nullable=False)
+    presiding_bishop = db.Column(db.String(120), default='Presiding Bishopric')
+    digital_signature_stamp = db.Column(db.String(120), default='VERIFIED-RLDS-SACRED-SEAL')
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'certificate_hash': self.certificate_hash,
+            'member_id': self.member_id,
+            'candidate_name': self.candidate_name,
+            'baptism_date': self.baptism_date.isoformat() if self.baptism_date else None,
+            'baptizing_elder': self.baptizing_elder,
+            'confirming_elder': self.confirming_elder,
+            'presiding_bishop': self.presiding_bishop,
+            'digital_signature_stamp': self.digital_signature_stamp
+        }
+
+
+class CellGroup(db.Model):
+    """14. Small-Group / Fellowship Cell Group Portal."""
+    __tablename__ = 'cell_groups'
+
+    id = db.Column(db.Integer, primary_key=True)
+    group_name = db.Column(db.String(120), nullable=False) # e.g. "Lurambi Shalom Cell"
+    neighborhood_area = db.Column(db.String(120), nullable=False)
+    host_family = db.Column(db.String(120), nullable=False)
+    meeting_day_time = db.Column(db.String(80), default='Tuesdays 5:30 PM')
+    leader_elder = db.Column(db.String(120), nullable=False)
+    contact_phone = db.Column(db.String(30), nullable=False)
+    active_members_count = db.Column(db.Integer, default=18)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'group_name': self.group_name,
+            'neighborhood_area': self.neighborhood_area,
+            'host_family': self.host_family,
+            'meeting_day_time': self.meeting_day_time,
+            'leader_elder': self.leader_elder,
+            'contact_phone': self.contact_phone,
+            'active_members_count': self.active_members_count
+        }
+
+
+class AudioSermon(db.Model):
+    """15. Offline Voice Sermon Recorder & Podcast Archive."""
+    __tablename__ = 'audio_sermons'
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    preacher = db.Column(db.String(120), nullable=False)
+    scripture_reference = db.Column(db.String(120), nullable=False)
+    preach_date = db.Column(db.Date, nullable=False)
+    duration_minutes = db.Column(db.Integer, default=45)
+    audio_file_url = db.Column(db.String(255), nullable=False)
+    summary_notes = db.Column(db.Text, nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'preacher': self.preacher,
+            'scripture_reference': self.scripture_reference,
+            'preach_date': self.preach_date.isoformat() if self.preach_date else None,
+            'duration_minutes': self.duration_minutes,
+            'audio_file_url': self.audio_file_url,
+            'summary_notes': self.summary_notes
+        }
+
+
+class YouthMentorshipProfile(db.Model):
+    """16. Youth Mentorship & Career Empowerment Directory."""
+    __tablename__ = 'youth_mentorship_profiles'
+
+    id = db.Column(db.Integer, primary_key=True)
+    mentor_name = db.Column(db.String(120), nullable=False)
+    profession = db.Column(db.String(120), nullable=False) # Software, Agriculture, Medicine, Law
+    organization = db.Column(db.String(120), nullable=False)
+    phone_contact = db.Column(db.String(30), nullable=False)
+    email = db.Column(db.String(120), nullable=False)
+    available_mentee_slots = db.Column(db.Integer, default=3)
+    bio = db.Column(db.Text, nullable=False)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'mentor_name': self.mentor_name,
+            'profession': self.profession,
+            'organization': self.organization,
+            'phone_contact': self.phone_contact,
+            'email': self.email,
+            'available_mentee_slots': self.available_mentee_slots,
+            'bio': self.bio
+        }
+
+
+class ChildPickupSecurity(db.Model):
+    """17. Parent-Child Secure Pickup Verification System (QR & One-Time PIN)."""
+    __tablename__ = 'child_pickup_securities'
+
+    id = db.Column(db.Integer, primary_key=True)
+    child_name = db.Column(db.String(120), nullable=False)
+    parent_member_id = db.Column(db.String(50), nullable=False)
+    one_time_pin = db.Column(db.String(10), nullable=False)
+    qr_verification_token = db.Column(db.String(80), unique=True, nullable=False)
+    service_date = db.Column(db.Date, default=datetime.utcnow)
+    is_released = db.Column(db.Boolean, default=False)
+    verified_by_teacher = db.Column(db.String(120), nullable=True)
+    released_at = db.Column(db.DateTime, nullable=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'child_name': self.child_name,
+            'parent_member_id': self.parent_member_id,
+            'one_time_pin': self.one_time_pin,
+            'qr_verification_token': self.qr_verification_token,
+            'is_released': self.is_released,
+            'verified_by_teacher': self.verified_by_teacher
+        }
+
+
+class PledgeCampaign(db.Model):
+    """18. Multi-Pledge Project Tracker (Land Acquisition & Sanctuary Building)."""
+    __tablename__ = 'pledge_campaigns'
+
+    id = db.Column(db.Integer, primary_key=True)
+    campaign_name = db.Column(db.String(150), nullable=False)
+    target_amount = db.Column(db.Float, nullable=False)
+    raised_amount = db.Column(db.Float, default=0.0)
+    deadline_date = db.Column(db.Date, nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    total_pledgers = db.Column(db.Integer, default=0)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'campaign_name': self.campaign_name,
+            'target_amount': self.target_amount,
+            'raised_amount': self.raised_amount,
+            'deadline_date': self.deadline_date.isoformat() if self.deadline_date else None,
+            'description': self.description,
+            'total_pledgers': self.total_pledgers,
+            'progress_percent': round((self.raised_amount / self.target_amount) * 100, 1) if self.target_amount > 0 else 0
+        }
+
+
+class CounselingAppointment(db.Model):
+    """19. Digital Pastoral Counseling Appointment Scheduler."""
+    __tablename__ = 'counseling_appointments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    member_id = db.Column(db.String(50), nullable=False)
+    member_name = db.Column(db.String(120), nullable=False)
+    minister_name = db.Column(db.String(120), default='Pastor Samuel Makokha')
+    appointment_time = db.Column(db.DateTime, nullable=False)
+    session_mode = db.Column(db.String(30), default='In-Person Sanctuary') # In-Person Sanctuary, Phone Call
+    counseling_topic = db.Column(db.String(150), nullable=False)
+    status = db.Column(db.String(30), default='Scheduled') # Scheduled, Completed, Rescheduled
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'member_id': self.member_id,
+            'member_name': self.member_name,
+            'minister_name': self.minister_name,
+            'appointment_time': self.appointment_time.isoformat() if self.appointment_time else None,
+            'session_mode': self.session_mode,
+            'counseling_topic': self.counseling_topic,
+            'status': self.status
+        }
+
+
+class CouncilElection(db.Model):
+    """20. Church Council Voting & Deliberative Governance System."""
+    __tablename__ = 'council_elections'
+
+    id = db.Column(db.Integer, primary_key=True)
+    election_title = db.Column(db.String(150), nullable=False)
+    resolution_details = db.Column(db.Text, nullable=False)
+    start_date = db.Column(db.DateTime, default=datetime.utcnow)
+    end_date = db.Column(db.DateTime, nullable=False)
+    total_votes = db.Column(db.Integer, default=0)
+    yes_votes = db.Column(db.Integer, default=0)
+    no_votes = db.Column(db.Integer, default=0)
+    status = db.Column(db.String(30), default='Open') # Open, Concluded
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'election_title': self.election_title,
+            'resolution_details': self.resolution_details,
+            'start_date': self.start_date.isoformat() if self.start_date else None,
+            'end_date': self.end_date.isoformat() if self.end_date else None,
+            'total_votes': self.total_votes,
+            'yes_votes': self.yes_votes,
+            'no_votes': self.no_votes,
+            'status': self.status
+        }

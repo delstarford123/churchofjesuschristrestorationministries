@@ -16,19 +16,26 @@ class Config:
     # Supports Vercel Postgres / Neon / Supabase / Railway / SQLite
     raw_db_url = os.getenv('DATABASE_URL') or os.getenv('POSTGRES_URL')
     
-    if raw_db_url:
+    is_serverless = (
+        os.getenv('VERCEL') is not None or
+        os.getenv('VERCEL_ENV') is not None or
+        os.getenv('AWS_LAMBDA_FUNCTION_NAME') is not None or
+        '/var/task' in os.path.abspath(__file__) or
+        (os.path.exists('/tmp') and os.name != 'nt')
+    )
+    
+    if raw_db_url and not raw_db_url.startswith('sqlite:'):
         # SQLAlchemy 1.4+ requires postgresql:// instead of postgres://
         if raw_db_url.startswith('postgres://'):
             raw_db_url = raw_db_url.replace('postgres://', 'postgresql://', 1)
         SQLALCHEMY_DATABASE_URI = raw_db_url
+    elif is_serverless:
+        SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/rlds_church.db'
+    elif raw_db_url:
+        SQLALCHEMY_DATABASE_URI = raw_db_url
     else:
-        # Fallback to SQLite (in /tmp for Vercel serverless writable folder, or local)
-        is_vercel = os.getenv('VERCEL', '0') == '1' or os.getenv('VERCEL_ENV') is not None
-        if is_vercel:
-            SQLALCHEMY_DATABASE_URI = 'sqlite:////tmp/rlds_church.db'
-        else:
-            base_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-            SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(base_dir, 'rlds_church.db')}"
+        base_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+        SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(base_dir, 'rlds_church.db')}"
             
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     
