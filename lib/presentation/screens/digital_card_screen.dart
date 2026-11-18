@@ -24,7 +24,7 @@ class _DigitalCardScreenState extends State<DigitalCardScreen> {
       final dio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl, connectTimeout: const Duration(seconds: 8)));
       final res = await dio.post('/governance/attendance/checkin', data: {
         'member_id': 'RLDS-78241',
-        'service_type': 'Sunday Sanctuary Service',
+        'service_type': 'Sunday Zion Service',
         'verification_method': method
       });
 
@@ -106,12 +106,12 @@ class _DigitalCardScreenState extends State<DigitalCardScreen> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                         decoration: BoxDecoration(
-                          color: stewardshipGold,
+                          color: _isCheckedIn ? const Color(0xFF16A34A) : stewardshipGold,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Text(
-                          'ELDER',
-                          style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
+                        child: Text(
+                          _isCheckedIn ? 'CHECKED IN' : 'ELDER',
+                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white),
                         ),
                       ),
                     ],

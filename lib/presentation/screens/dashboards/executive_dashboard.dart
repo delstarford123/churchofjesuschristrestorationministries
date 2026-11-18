@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rlds_church_app/core/localization/church_translations.dart';
 import 'package:rlds_church_app/core/theme/theme_provider.dart';
 import 'package:rlds_church_app/data/services/church_auth_session.dart';
+import 'package:rlds_church_app/presentation/screens/auth/welcome_landing_screen.dart';
 
 class ExecutiveDashboard extends StatefulWidget {
   const ExecutiveDashboard({super.key});
@@ -70,7 +71,7 @@ class _ExecutiveDashboardState extends State<ExecutiveDashboard> with SingleTick
     final dateController = TextEditingController(text: 'Sunday, Dec 6, 2026');
     final timeController = TextEditingController(text: '10:00 AM');
     final speakerController = TextEditingController();
-    final branchController = TextEditingController(text: 'Main Sanctuary');
+    final branchController = TextEditingController(text: 'Kakamega Central Cathedral');
 
     showDialog(
       context: context,
@@ -88,7 +89,7 @@ class _ExecutiveDashboardState extends State<ExecutiveDashboard> with SingleTick
               const SizedBox(height: 10),
               TextField(controller: speakerController, decoration: const InputDecoration(labelText: 'Speaker / Minister in Charge')),
               const SizedBox(height: 10),
-              TextField(controller: branchController, decoration: const InputDecoration(labelText: 'Host Branch / Sanctuary')),
+              TextField(controller: branchController, decoration: const InputDecoration(labelText: 'Host Branch / Assembly')),
             ],
           ),
         ),
@@ -109,11 +110,37 @@ class _ExecutiveDashboardState extends State<ExecutiveDashboard> with SingleTick
                 });
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Event published successfully to Sanctuary feed!'), backgroundColor: Color(0xFF16A34A)),
+                  const SnackBar(content: Text('Event published successfully to Church feed!'), backgroundColor: Color(0xFF16A34A)),
                 );
               }
             },
             child: const Text('Publish Event', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign Out / Logout'),
+        content: const Text('Are you sure you want to sign out from the Executive Council portal?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ChurchMemberSession.instance.clear();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const WelcomeLandingScreen()),
+                (route) => false,
+              );
+            },
+            child: const Text('Sign Out'),
           ),
         ],
       ),
@@ -142,9 +169,32 @@ class _ExecutiveDashboardState extends State<ExecutiveDashboard> with SingleTick
         ),
         actions: [
           IconButton(
+            tooltip: 'Language / Lugha',
+            icon: const Icon(Icons.language_rounded, color: Colors.white),
+            onPressed: () {
+              ChurchTranslations.showLanguagePickerModal(context, onLanguageChanged: () => setState(() {}));
+            },
+          ),
+          IconButton(
+            tooltip: 'Toggle Theme',
+            icon: Icon(
+              AppStateNotifier.instance.isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              AppStateNotifier.instance.toggleTheme();
+              setState(() {});
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.add_alert_rounded, color: Color(0xFFD97706)),
             tooltip: 'Publish Event',
             onPressed: _showAddEventDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.white),
+            tooltip: 'Sign Out / Switch Account',
+            onPressed: _showLogoutConfirmDialog,
           ),
         ],
         bottom: TabBar(

@@ -22,6 +22,19 @@ class ChurchMemberSession extends ChangeNotifier {
   bool get isSuperAdmin => role == ChurchRole.superAdmin;
   bool get isExecutive => role == ChurchRole.executive || role == ChurchRole.superAdmin;
   bool get isMember => role == ChurchRole.member || role == ChurchRole.executive || role == ChurchRole.superAdmin;
+  bool get isLoggedIn => role != ChurchRole.visitor && memberId.isNotEmpty;
+  String get assignedBranch => branch.isNotEmpty ? branch : 'Kakamega Central Cathedral';
+
+  void clear() {
+    memberId = '';
+    fullName = 'Guest Visitor';
+    email = '';
+    phone = '';
+    role = ChurchRole.visitor;
+    title = 'Visitor';
+    branch = 'Kakamega Central Cathedral';
+    notifyListeners();
+  }
 
   void signIn({
     required String id,
@@ -50,9 +63,13 @@ class ChurchMemberSession extends ChangeNotifier {
     } else if (newRole == ChurchRole.executive) {
       memberId = 'RLDS-EXEC-104';
       title = 'Presiding Elder / Pastor';
+    } else if (newRole == ChurchRole.visitor) {
+      memberId = '';
+      fullName = 'Guest Visitor';
+      title = 'Visiting Pilgrim in Zion';
     } else {
       memberId = 'RLDS-2026-1088';
-      title = 'Sanctuary Member in Good Standing';
+      title = 'Zion Member in Good Standing';
     }
     notifyListeners();
   }

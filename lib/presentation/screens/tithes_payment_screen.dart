@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import 'package:rlds_church_app/data/repositories/church_sync_repository.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_bloc.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_event.dart';
-import 'package:rlds_church_app/presentation/blocs/sync/church_sync_state.dart';
 
 class TithesPaymentScreen extends StatefulWidget {
   final bool initialOffline;
@@ -335,7 +334,7 @@ class _TithesPaymentScreenState extends State<TithesPaymentScreen> with SingleTi
             Text(
               isOffline
                   ? 'Encrypted in local device storage. Will sync to church ledger automatically once online.'
-                  : 'Official sanctuary receipt generated and synchronized with church records.',
+                  : 'Official Zion receipt generated and synchronized with church records.',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 12.5, color: textSlateGrey),
             ),
@@ -458,7 +457,7 @@ class _TithesPaymentScreenState extends State<TithesPaymentScreen> with SingleTi
             ),
             const SizedBox(height: 12),
             const Text(
-              'The Church of Jesus Christ Restoration Ministry • Sacred Sanctuary',
+              'The Church of Jesus Christ Restoration Ministry • Zion Assembly',
               style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500, color: textSlateGrey),
             ),
           ],
@@ -484,7 +483,7 @@ class _TithesPaymentScreenState extends State<TithesPaymentScreen> with SingleTi
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   Text(
-                    'M-Pesa Digital Sanctuary Portal',
+                    'M-Pesa Digital Church Portal',
                     style: TextStyle(fontSize: 11, color: Colors.white70),
                   ),
                 ],

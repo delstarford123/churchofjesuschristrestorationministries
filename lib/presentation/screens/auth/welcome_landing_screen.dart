@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:dio/dio.dart';
+import 'package:rlds_church_app/core/constants/api_constants.dart';
 import 'package:rlds_church_app/core/localization/church_translations.dart';
 import 'package:rlds_church_app/core/theme/theme_provider.dart';
 import 'package:rlds_church_app/data/services/church_auth_session.dart';
@@ -18,40 +20,7 @@ class WelcomeLandingScreen extends StatefulWidget {
 
 class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
   void _showLanguagePicker() {
-    showModalBottomSheet(
-      context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Select Language / Chagua Lugha',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const Divider(height: 1),
-              ...ChurchTranslations.supportedLanguages.map((lang) {
-                final isSelected = AppStateNotifier.instance.currentLanguage == lang;
-                return ListTile(
-                  title: Text(lang, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
-                  trailing: isSelected ? const Icon(Icons.check_circle, color: Color(0xFF1E3A8A)) : null,
-                  onTap: () {
-                    setState(() {
-                      AppStateNotifier.instance.setLanguage(lang);
-                    });
-                    Navigator.pop(context);
-                  },
-                );
-              }),
-            ],
-          ),
-        );
-      },
-    );
+    ChurchTranslations.showLanguagePickerModal(context, onLanguageChanged: () => setState(() {}));
   }
 
   void _showSignInDialog() {
@@ -86,11 +55,11 @@ class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
                     ),
                     const SizedBox(height: 16),
                     const Text(
-                      'Sign In to Sanctuary Portal',
+                      'Sign In to Zion Portal',
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const Text(
-                      'Universal Sanctuary Access: Super Admin, Executive & Members',
+                      'Universal Access: Super Admin, Executive Council & Members',
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     const SizedBox(height: 20),
@@ -173,89 +142,141 @@ class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
     final emailController = TextEditingController();
-    String branch = 'Kakamega Central Cathedral';
+    final customBranchController = TextEditingController();
+    String branch = 'Main Sanctuary Assembly';
+    List<String> branches = ['Main Sanctuary Assembly'];
+    bool isFetchingBranches = true;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 20,
-            right: 20,
-            top: 24,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Join RLDS Restoration Ministry',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
-                const Text(
-                  'Your official unique Membership Number will be generated automatically.',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: 'Full Official Name', prefixIcon: Icon(Icons.person_outline), border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: phoneController,
-                  decoration: const InputDecoration(labelText: 'M-Pesa Phone Number', prefixIcon: Icon(Icons.phone_outlined), border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: emailController,
-                  decoration: const InputDecoration(labelText: 'Email Address', prefixIcon: Icon(Icons.email_outlined), border: OutlineInputBorder()),
-                ),
-                const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: branch,
-                  decoration: const InputDecoration(labelText: 'Home Branch Assembly', border: OutlineInputBorder()),
-                  items: ['Kakamega Central Cathedral', 'Lurambi Assembly', 'Malava Assembly', 'Nairobi Metropolitan']
-                      .map((b) => DropdownMenuItem(value: b, child: Text(b)))
-                      .toList(),
-                  onChanged: (val) => branch = val ?? branch,
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFD97706),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    onPressed: () {
-                      if (nameController.text.trim().isNotEmpty) {
-                        final assignedId = ChurchMemberSession.generateMembershipNumber();
-                        ChurchMemberSession.instance.signIn(
-                          id: assignedId,
-                          name: nameController.text.trim(),
-                          userEmail: emailController.text.trim(),
-                          userPhone: phoneController.text.trim(),
-                          userRole: ChurchRole.member,
-                          userTitle: 'Registered Member',
-                          userBranch: branch,
-                        );
-
-                        Navigator.pop(context);
-                        _showMembershipSuccessDialog(assignedId, nameController.text.trim());
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            if (isFetchingBranches) {
+              isFetchingBranches = false;
+              Dio(BaseOptions(baseUrl: ApiConstants.baseUrl, connectTimeout: const Duration(seconds: 4)))
+                  .get('/tech/branches')
+                  .then((res) {
+                    if (res.statusCode == 200 && res.data['branches'] != null) {
+                      final fetched = (res.data['branches'] as List)
+                          .map((b) => b['name']?.toString() ?? '')
+                          .where((n) => n.isNotEmpty)
+                          .toList();
+                      if (fetched.isNotEmpty) {
+                        setModalState(() {
+                          branches = fetched;
+                          branch = fetched.first;
+                        });
                       }
-                    },
-                    child: const Text('Complete Registration & Generate ID', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
+                    }
+                  })
+                  .catchError((_) {});
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(
+                left: 20,
+                right: 20,
+                top: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Join RLDS Restoration Ministry',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    const Text(
+                      'Your official unique Membership Number will be generated automatically.',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: nameController,
+                      decoration: const InputDecoration(labelText: 'Full Official Name', prefixIcon: Icon(Icons.person_outline), border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: phoneController,
+                      decoration: const InputDecoration(labelText: 'M-Pesa Phone Number', prefixIcon: Icon(Icons.phone_outlined), border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: emailController,
+                      decoration: const InputDecoration(labelText: 'Email Address', prefixIcon: Icon(Icons.email_outlined), border: OutlineInputBorder()),
+                    ),
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      value: branches.contains(branch) ? branch : branches.first,
+                      decoration: const InputDecoration(
+                        labelText: 'Home Branch Assembly (Live Database)',
+                        border: OutlineInputBorder(),
+                        prefixIcon: Icon(Icons.church_outlined),
+                      ),
+                      items: [
+                        ...branches.map((b) => DropdownMenuItem(value: b, child: Text(b))),
+                        const DropdownMenuItem(value: 'Other / Specify Below', child: Text('Other / Specify Below')),
+                      ],
+                      onChanged: (val) {
+                        setModalState(() {
+                          branch = val ?? branch;
+                        });
+                      },
+                    ),
+                    if (branch == 'Other / Specify Below') ...[
+                      const SizedBox(height: 10),
+                      TextField(
+                        controller: customBranchController,
+                        decoration: const InputDecoration(
+                          labelText: 'Type Your Assembly Location',
+                          border: OutlineInputBorder(),
+                          prefixIcon: Icon(Icons.edit_location_outlined),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFD97706),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () {
+                          if (nameController.text.trim().isNotEmpty) {
+                            final assignedId = ChurchMemberSession.generateMembershipNumber();
+                            final finalBranch = branch == 'Other / Specify Below' && customBranchController.text.trim().isNotEmpty
+                                ? customBranchController.text.trim()
+                                : branch;
+
+                            ChurchMemberSession.instance.signIn(
+                              id: assignedId,
+                              name: nameController.text.trim(),
+                              userEmail: emailController.text.trim(),
+                              userPhone: phoneController.text.trim(),
+                              userRole: ChurchRole.member,
+                              userTitle: 'Registered Member',
+                              userBranch: finalBranch,
+                            );
+
+                            Navigator.pop(context);
+                            _showMembershipSuccessDialog(assignedId, nameController.text.trim());
+                          }
+                        },
+                        child: const Text('Complete Registration & Generate ID', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -270,7 +291,12 @@ class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
           children: [
             Icon(Icons.verified_rounded, color: Color(0xFF16A34A)),
             SizedBox(width: 8),
-            Text('Welcome to the Sanctuary!'),
+            Expanded(
+              child: Text(
+                'Welcome to Zion!',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
           ],
         ),
         content: Column(

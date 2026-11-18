@@ -1,3 +1,8 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:rlds_church_app/core/theme/theme_provider.dart';
+
 class ChurchTranslations {
   static const List<String> supportedLanguages = [
     'English',
@@ -9,42 +14,61 @@ class ChurchTranslations {
     'Oluluhya (Luhya)'
   ];
 
-  static final Map<String, Map<String, String>> _localizedValues = {
+  static Map<String, Map<String, String>> _localizedValues = {};
+
+  static Future<void> loadTranslations() async {
+    try {
+      final jsonString = await rootBundle.loadString('assets/translations/app_translations.json');
+      final Map<String, dynamic> decoded = json.decode(jsonString);
+      _localizedValues = decoded.map((key, value) {
+        final Map<String, String> innerMap = (value as Map<String, dynamic>).map((k, v) => MapEntry(k, v.toString()));
+        return MapEntry(key, innerMap);
+      });
+    } catch (_) {
+      // Fallback statically if asset not yet loaded
+    }
+  }
+
+  static final Map<String, Map<String, String>> _staticFallback = {
     'English': {
       'app_title': 'The Church of Jesus Christ Restoration Ministry',
-      'tagline': 'Restoration Ministry • Digital Sanctuary',
-      'welcome_title': 'Welcome to the Digital Sanctuary',
+      'tagline': 'Restoration Ministry • Digital Zion',
+      'welcome_title': 'Welcome to Zion',
       'welcome_sub': 'Faith, Consecration, and Divine Stewardship',
       'sign_in': 'Sign In',
       'register': 'Register as Member',
       'visitor_continue': 'Continue as Visitor',
       'super_admin_portal': 'Super Admin Portal',
       'executive_portal': 'Executive Council Portal',
-      'member_portal': 'Member Sanctuary Portal',
+      'member_portal': 'Member Zion Portal',
       'stewardship_kitty': 'Stewardship Kitty',
       'tithes_offerings': 'Tithes & Offerings',
       'inspired_scriptures': 'Inspired Scriptures',
       'branch_assemblies': 'Branch Assemblies',
       'community_outreach': 'Community Outreach & Welfare',
-      'digital_card': 'Digital Sanctuary Card',
+      'digital_card': 'Digital Zion Pass',
       'attendance': 'Smart Attendance Check-In',
       'events_calendar': 'Church Events & Liturgy',
-      'theme_mode': 'Theme',
+      'theme_mode': 'Theme Mode',
       'language': 'Language',
-      'sign_out': 'Sign Out',
+      'sign_out': 'Sign Out / Switch Account',
       'give_tithe': 'Submit Tithe / Offering',
       'apply_kitty': 'Apply for Stewardship Kitty Loan',
       'read_word': 'Read Scriptures (IV & BoM)',
       'membership_number': 'Membership Number',
-      'executive_board': 'Executive Council (Pastors, Elders, Deacons)',
-      'manage_executives': 'Manage Executive Members',
-      'add_event': 'Publish New Church Event',
-      'add_branch': 'Register Branch Assembly',
+      'home_assembly': 'Home Branch Assembly',
+      'no_events': 'No upcoming events or retreats scheduled yet. Executive members will publish upcoming assemblies here.',
+      'no_branches': 'No branch assemblies registered yet. Executive members and church administration will register official assemblies here.',
+      'ai_support': 'RLDS AI Pastoral Support',
+      'ai_prompt': 'Ask about loans, tithes, scriptures, service schedules...',
+      'speak_response': 'Listen Aloud',
+      'stop_speech': 'Stop Voice',
+      'visitor_notice': 'Visitor Mode: Browse the Sanctuary feed, sacred scriptures, and ministry portals. Sign in to access your personal member records, tithing ledger, and kitty benefits.'
     },
     'Kiswahili': {
       'app_title': 'Kanisa la Yesu Kristo Huduma ya Urejesho',
       'tagline': 'Huduma ya Urejesho • Hekalu la Kidijitali',
-      'welcome_title': 'Karibu kwenye Hekalu la Kidijitali',
+      'welcome_title': 'Karibu Sayuni',
       'welcome_sub': 'Imani, Kujitolea na Uwakili Mtakatifu',
       'sign_in': 'Ingia',
       'register': 'Jisajili kama Mshiriki',
@@ -62,20 +86,24 @@ class ChurchTranslations {
       'events_calendar': 'Matukio ya Kanisa na Ibada',
       'theme_mode': 'Mwonekano',
       'language': 'Lugha',
-      'sign_out': 'Toka',
+      'sign_out': 'Toka / Badilisha Akaunti',
       'give_tithe': 'Toa Zaka / Sadaka',
       'apply_kitty': 'Omba Mkopo wa Hazina ya Uwakili',
       'read_word': 'Soma Neno (Toleo Lililovuvwa & Kitabu cha Mormoni)',
       'membership_number': 'Nambari ya Ushiriki',
-      'executive_board': 'Baraza la Watumishi (Wachungaji, Wazee, Mashemasi)',
-      'manage_executives': 'Dhibiti Viongozi Watendaji',
-      'add_event': 'Tangaza Tukio la Kanisa',
-      'add_branch': 'Sajili Tawi Jipya',
+      'home_assembly': 'Tawi la Nyumbani',
+      'no_events': 'Hakuna matukio yaliyopangwa kwa sasa. Viongozi watachapisha matukio na mikutano hivi karibuni.',
+      'no_branches': 'Hakuna matawi yaliyosajiliwa bado. Viongozi watasajili matawi rasmi hapa.',
+      'ai_support': 'Msaidizi wa AI wa Kichungaji',
+      'ai_prompt': 'Uliza kuhusu mikopo, zaka, maandiko, na ratiba za ibada...',
+      'speak_response': 'Sikiliza kwa Sauti',
+      'stop_speech': 'Nyamazisha Sauti',
+      'visitor_notice': 'Hali ya Mgeni: Chunguza matukio, maandiko na huduma za kanisa. Ingia ili kupata kadi yako, rekodi za zaka, na mikopo ya wakili.'
     },
     'Dholuo (Luo)': {
       'app_title': 'Kanisa mar Yesu Kristo Tij Lokruok',
       'tagline': 'Tij Lokruok • Kar Lamo mar Kidijitali',
-      'welcome_title': 'Irwaki e Kar Lamo mar Kidijitali',
+      'welcome_title': 'Irwaki e Sayun',
       'welcome_sub': 'Yie, Chiwruok kod Kanyo mar Roho',
       'sign_in': 'Donyie',
       'register': 'Ndikri kaka Jakanyo',
@@ -83,7 +111,7 @@ class ChurchTranslations {
       'super_admin_portal': 'Kar Jotend Madongo',
       'executive_portal': 'Kar Jotend Kanisa',
       'member_portal': 'Kar Jokanyo',
-      'stewardship_kitty': 'Onding mar Kanyo (Stewardship Kitty)',
+      'stewardship_kitty': 'Onding mar Kanyo (Kitty)',
       'tithes_offerings': 'Fungu mar Apar kod Chiwo',
       'inspired_scriptures': 'Ndikete Maler mar Lokruok',
       'branch_assemblies': 'Migawo mag Kanisa',
@@ -98,46 +126,54 @@ class ChurchTranslations {
       'apply_kitty': 'Kwa Kony mar Stewardship Kitty',
       'read_word': 'Som Wach Nyasaye',
       'membership_number': 'Namba mar Kanyo',
-      'executive_board': 'Jotend Kanisa (Jokwath, Jodongo)',
-      'manage_executives': 'Rangi Jotend Kanisa',
-      'add_event': 'Med Chenro Manyien',
-      'add_branch': 'Med Migawo Manyien',
+      'home_assembly': 'Migao mar Dala',
+      'no_events': 'Chenro moro amora pod onge sani. Jotend kanisa biro keto chenro mag chokruok ka.',
+      'no_branches': 'Migawo pod ok ondiki. Jotend biro ndiko migawo kani.',
+      'ai_support': 'Jakony mar AI e Kanisa',
+      'ai_prompt': 'Penj wach kony, chiwo, ndiko, kod seche mag lamo...',
+      'speak_response': 'Chik iti iwinji',
+      'stop_speech': 'Geng\' dwol',
+      'visitor_notice': 'Wendo: Som ndiko kod chenro mag kanisa. Donyie mondo iyud kadi mari kod kony mag kanisa.'
     },
     'Ekegusii (Abagusii)': {
-      'app_title': 'Ekanisa ya Yesu Kristo Orosio rw’Okogorogigwa',
+      'app_title': 'Ekanisa ya Yesu Kristo Orosio rw\'Okogorogigwa',
       'tagline': 'Okogorogigwa • Ekanisa ye Esimi',
-      'welcome_title': 'Inche Oribwo ase Ekanisa ye Esimi',
-      'welcome_sub': 'Okworokia, Obochenu n’Oborinde bwa Nyasae',
+      'welcome_title': 'Inche Oribwo ase Sayuni',
+      'welcome_sub': 'Okworokia, Obochenu n\'Oborinde bwa Nyasae',
       'sign_in': 'Ingia (Soora)',
       'register': 'Rekerana Obe Omwanya',
       'visitor_continue': 'Genda Boigo omueni',
       'super_admin_portal': 'Abaiteki Abanene',
-      'executive_portal': 'Abanene b’Ekanisa',
+      'executive_portal': 'Abanene b\'Ekanisa',
       'member_portal': 'Ase Abanyakanisa',
       'stewardship_kitty': 'Egetabo ki Oborinde (Kitty)',
-      'tithes_offerings': 'Esemo n’Amalabi',
-      'inspired_scriptures': 'Ebibilia n’Egetabo kia Mormoni',
-      'branch_assemblies': 'Amatwi y’Ekanisa',
-      'community_outreach': 'Orogendo rw’Abanyamwando',
+      'tithes_offerings': 'Esemo n\'Amalabi',
+      'inspired_scriptures': 'Ebibilia n\'Egetabo kia Mormoni',
+      'branch_assemblies': 'Amatwi y\'Ekanisa',
+      'community_outreach': 'Orogendo rw\'Abanyamwando',
       'digital_card': 'Echati ye Ekanisa',
       'attendance': 'Okorigia Ebisio',
-      'events_calendar': 'Emegano y’Ekanisa',
+      'events_calendar': 'Emegano y\'Ekanisa',
       'theme_mode': 'Obororo',
       'language': 'Omonwa',
       'sign_out': 'Rwa Ase Enka',
-      'give_tithe': 'Aana Esemo y’Ekanisa',
+      'give_tithe': 'Aana Esemo y\'Ekanisa',
       'apply_kitty': 'Saba Obokonyi bwa Kitty',
       'read_word': 'Soma Ebibilia',
       'membership_number': 'Enamba yo Omwanya',
-      'executive_board': 'Abachungaji n’Abagaka',
-      'manage_executives': 'Teba Abanene',
-      'add_event': 'Eka Emegano Emyia',
-      'add_branch': 'Eka Etwi Enyia',
+      'home_assembly': 'Etwi yo Omochie',
+      'no_events': 'Tobaire n\'emegano y\'ekanisa rero. Abanene mbaeke emegano enka.',
+      'no_branches': 'Amatwi y\'ekanisa tarasorekwa. Abanene mbasore amatwi amo.',
+      'ai_support': 'Omokonyi Owo Bwenge bwa Esimi (AI)',
+      'ai_prompt': 'Teba amakwana ye esemo, obokonyi, n\'amagano y\'okosoma...',
+      'speak_response': 'Igua Omororo',
+      'stop_speech': 'Tiga Omororo',
+      'visitor_notice': 'Omweni: Rora amagano n\'ebibilia. Soora oyore echati yao y\'obwanyakanisa.'
     },
     'Maa (Maasai)': {
       'app_title': 'Enkanisa e Yesu Kristo Enkishoroto',
       'tagline': 'Enkishoroto • Enkanisa e Kidijitali',
-      'welcome_title': 'Supa, Karibu te Nkanisa',
+      'welcome_title': 'Supa, Karibu te Sayuni',
       'welcome_sub': 'Enkirukoto, Nyorata o Nkishurotin e Nkai',
       'sign_in': 'Jing\'u',
       'register': 'Isiru enkoriong\'',
@@ -160,15 +196,19 @@ class ChurchTranslations {
       'apply_kitty': 'Sompa Kitty',
       'read_word': 'Inqo Oloroiti le Nkai',
       'membership_number': 'Namba e Nkanisa',
-      'executive_board': 'Lapaashan le Nkanisa',
-      'manage_executives': 'Igor Larikok',
-      'add_event': 'Isho Emurua Enyorr',
-      'add_branch': 'Isho Enkop Enyorr',
+      'home_assembly': 'Enkop e Nkanisa',
+      'no_events': 'Eitu eipang\'ari isiana. Larikok ooshukoki isiana tenebo.',
+      "no_branches": 'Eitu eishoru nkopitin. Larikok oosiru nkopitin tenebo.',
+      'ai_support': 'Oretok le AI te Nkanisa',
+      'ai_prompt': 'Tuuta mbaa e nkishurotin, kony, o nkatitin e nkanisa...',
+      'speak_response': 'Toning\'o Oltoilo',
+      'stop_speech': 'Iteela Oltoilo',
+      'visitor_notice': 'Loo lomon: Ning\'o olosho le Nkai. Jing\'u pee itumi ewara ino o mbaa e nkanisa.'
     },
     'Kalenjin / Nandi': {
       'app_title': 'Kanisetab Jeso Kristo Kanyetet',
       'tagline': 'Kanyetet • Hekalutab Dijitali',
-      'welcome_title': 'Chamgei eng Hekalutab Dijitali',
+      'welcome_title': 'Chamgei eng Sayuni',
       'welcome_sub': 'Kayanet, Tororitet ak Boiyisyetab Kamuktaindet',
       'sign_in': 'Chut Koreet',
       'register': 'Sir Kayanet',
@@ -191,15 +231,19 @@ class ChurchTranslations {
       'apply_kitty': 'Som Toretetab Kitty',
       'read_word': 'Soman Bukuit',
       'membership_number': 'Nambaitab Kayanet',
-      'executive_board': 'Pastoryek ak Boiyik',
-      'manage_executives': 'Rip Kandoik',
-      'add_event': 'Sir Kasarta Ne Leel',
-      'add_branch': 'Sir Koret Ne Leel',
+      'home_assembly': 'Koretab Gaa',
+      'no_events': 'Mami toretet ne kikoiboor kasaratoni. Kandoik che nairei toretet yu.',
+      'no_branches': 'Mami korosyek che kisir eng kandoet. Kandoik che nairei korosyek yu.',
+      'ai_support': 'Toretetab AI eng Kaniset',
+      'ai_prompt': 'Teeb kandoet, tamanwek, buku ne tilil, ak saet...',
+      'speak_response': 'Kasyinetab Kutit',
+      'stop_speech': 'Gira Kutit',
+      'visitor_notice': 'Tooriyot: Soman buku ne tilil ak kaniset. Chut mondo inyol kardit ak toretetab kaniset.'
     },
     'Oluluhya (Luhya)': {
       'app_title': 'Ikanisa ya Yesu Kristo Okhubukulula',
       'tagline': 'Okhubukulula • Itembero lie Khusimi',
-      'welcome_title': 'Mulembe! Karibu Itembero lie Khusimi',
+      'welcome_title': 'Mulembe! Karibu Sayuni',
       'welcome_sub': 'Okhusuubila, Obwihani nende Obulindi bwa Nyasaye',
       'sign_in': 'Injila Muno',
       'register': 'Lembwa Obe Omukanisa',
@@ -207,10 +251,10 @@ class ChurchTranslations {
       'super_admin_portal': 'Abarangisi Abalulu',
       'executive_portal': 'Abarangisi be Ikanisa',
       'member_portal': 'Abarumishi be Ikanisa',
-      'stewardship_kitty': 'Omuhuko kw’Obulindi (Stewardship Kitty)',
+      'stewardship_kitty': 'Omuhuko kw\'Obulindi (Stewardship Kitty)',
       'tithes_offerings': 'Ekumi nende Imilukho',
       'inspired_scriptures': 'Ebibilia Eyavuvwa nende Ekitabu shia Mormoni',
-      'branch_assemblies': 'Amashembeli ke Ikanisa (Kakamega, Nairobi)',
+      'branch_assemblies': 'Amashembeli ke Ikanisa',
       'community_outreach': 'Okhuhana nende Okhukhoonyana',
       'digital_card': 'Echati ye Omusuubili',
       'attendance': 'Okhwinjila Mwitendo',
@@ -222,14 +266,67 @@ class ChurchTranslations {
       'apply_kitty': 'Saba Omuhuko kwa Stewardship Kitty',
       'read_word': 'Soma Likhuwa lia Nyasaye',
       'membership_number': 'Enamba yo Omusuubili',
-      'executive_board': 'Abarangisi (Abashungi, Abakukhu, Abadeacon)',
-      'manage_executives': 'Ranga Abarangisi',
-      'add_event': 'Fwala Omulimo Omuhya',
-      'add_branch': 'Sajili Eshembeli Ehya',
+      'home_assembly': 'Eshembeli ye Ingo',
+      'no_events': 'Shikharaho emilimo chiahandikwa khulwano tawe. Abarangisi banakhasa emilimo yano.',
+      'no_branches': 'Amashembeli shikarambwa tawe. Abarangisi banasajili amasheli yano.',
+      'ai_support': 'Omukhoonyi wa AI mu Kanisa',
+      'ai_prompt': 'Reba khumuhuko, ekumi, ebibilia, nende tsinyinga tsie lisolo...',
+      'speak_response': 'Ihulila Olulimi',
+      'stop_speech': 'Reka Olulimi',
+      'visitor_notice': 'Omucheni: Soma ebibilia nende emilimo chie ikanisa. Injila okhubukulula echati yio nende omuhuko.'
     },
   };
 
   static String tr(String key, {String lang = 'English'}) {
-    return _localizedValues[lang]?[key] ?? _localizedValues['English']?[key] ?? key;
+    if (_localizedValues.containsKey(lang) && _localizedValues[lang]!.containsKey(key)) {
+      return _localizedValues[lang]![key]!;
+    }
+    return _staticFallback[lang]?[key] ?? _staticFallback['English']?[key] ?? key;
+  }
+
+  static void showLanguagePickerModal(BuildContext context, {VoidCallback? onLanguageChanged}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) {
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(ctx).size.height * 0.65,
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      'Select Language / Chagua Lugha',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  ...supportedLanguages.map((lang) {
+                    final isSelected = AppStateNotifier.instance.currentLanguage == lang;
+                    return ListTile(
+                      title: Text(lang, style: TextStyle(fontWeight: isSelected ? FontWeight.bold : FontWeight.normal)),
+                      trailing: isSelected ? const Icon(Icons.check_circle, color: Color(0xFF1E3A8A)) : null,
+                      onTap: () {
+                        AppStateNotifier.instance.setLanguage(lang);
+                        if (onLanguageChanged != null) {
+                          onLanguageChanged();
+                        }
+                        Navigator.pop(ctx);
+                      },
+                    );
+                  }),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }

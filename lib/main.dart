@@ -5,6 +5,7 @@ import 'package:rlds_church_app/data/repositories/church_sync_repository.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_bloc.dart';
 import 'package:rlds_church_app/presentation/screens/church_splash_screen.dart';
 import 'package:rlds_church_app/core/theme/theme_provider.dart';
+import 'package:rlds_church_app/core/localization/church_translations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -15,6 +16,9 @@ void main() async {
   await Hive.openBox('offline_queue');
   await Hive.openBox('auth_cache');
   await Hive.openBox('church_content_cache');
+
+  // Load centralized translations
+  await ChurchTranslations.loadTranslations();
 
   final syncRepository = ChurchSyncRepository();
 

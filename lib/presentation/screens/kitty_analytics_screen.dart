@@ -253,8 +253,8 @@ class _KittyAnalyticsScreenState extends State<KittyAnalyticsScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Portfolio Default Rate: $_defaultRate%', style: const TextStyle(fontSize: 12, color: Color(0xFF4B5563))),
-                              const Text('Audit Status: Verified', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF16A34A))),
+                              Text('Total Reserve: KES ${NumberFormat('#,##0').format(_totalReserve)}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: liturgicalBlue)),
+                              Text('Default: $_defaultRate%', style: const TextStyle(fontSize: 12, color: Color(0xFF4B5563))),
                             ],
                           ),
                         ],

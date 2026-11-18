@@ -17,7 +17,7 @@ TRANSLATIONS = {
         'give_tithe': 'Toa Fungu la Kumi',
         'apply_loan': 'Omba Mkopo wa Hazina',
         'offline_mode': 'Hali ya Nje ya Mtandao (Imehifadhiwa Kwenye Simu)',
-        'online_mode': 'Imeunganishwa na Wingu la Patakatifu',
+        'online_mode': 'Imeunganishwa na Mtandao wa Sayuni',
         'events': 'Ratiba na Mikutano',
         'branches': 'Matawi ya Kanisa Kakamega na Kenya',
         'scripture_verse': 'Leteni zaka zote ghalani, ili kuwe na chakula nyumbani mwangu.',
@@ -30,11 +30,11 @@ TRANSLATIONS = {
         'give_tithe': 'Submit Kingdom Contribution',
         'apply_loan': 'Apply for Kitty Loan',
         'offline_mode': 'Offline Mode (Local Storage Active)',
-        'online_mode': 'Connected to Sanctuary Cloud',
+        'online_mode': 'Connected to Zion Ministry Network',
         'events': 'Events & Calendar',
         'branches': 'Church Branch Locator',
         'scripture_verse': 'Bring all the tithes into the storehouse, that there may be food in My house.',
-        'ministry_credit': 'Restoration Ministry Digital Sanctuary'
+        'ministry_credit': 'Restoration Ministry Digital Church'
     }
 }
 

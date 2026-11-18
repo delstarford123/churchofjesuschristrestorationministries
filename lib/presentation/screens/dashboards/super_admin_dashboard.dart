@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:rlds_church_app/core/localization/church_translations.dart';
 import 'package:rlds_church_app/core/theme/theme_provider.dart';
 import 'package:rlds_church_app/data/services/church_auth_session.dart';
+import 'package:rlds_church_app/presentation/screens/auth/welcome_landing_screen.dart';
 
 class SuperAdminDashboard extends StatefulWidget {
   const SuperAdminDashboard({super.key});
@@ -113,7 +114,7 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
   void _showAddExecutiveDialog() {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
-    final branchController = TextEditingController(text: _branches.isNotEmpty ? _branches.first['name'] : 'Main Sanctuary');
+    final branchController = TextEditingController(text: _branches.isNotEmpty ? _branches.first['name'] : 'Kakamega Central Cathedral');
     String selectedRole = 'Pastor';
 
     showDialog(
@@ -218,10 +219,35 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
     );
   }
 
+  void _showLogoutConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign Out / Logout'),
+        content: const Text('Are you sure you want to sign out from the Super Admin Supreme Council portal?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ChurchMemberSession.instance.clear();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const WelcomeLandingScreen()),
+                (route) => false,
+              );
+            },
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final lang = AppStateNotifier.instance.currentLanguage;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -241,9 +267,32 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
         ),
         actions: [
           IconButton(
+            tooltip: 'Language / Lugha',
+            icon: const Icon(Icons.language_rounded, color: Colors.white),
+            onPressed: () {
+              ChurchTranslations.showLanguagePickerModal(context, onLanguageChanged: () => setState(() {}));
+            },
+          ),
+          IconButton(
+            tooltip: 'Toggle Theme',
+            icon: Icon(
+              AppStateNotifier.instance.isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              AppStateNotifier.instance.toggleTheme();
+              setState(() {});
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.person_add_rounded, color: Color(0xFFD97706)),
             tooltip: 'Appoint Executive Member',
             onPressed: _showAddExecutiveDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout_rounded, color: Colors.white),
+            tooltip: 'Sign Out / Switch Account',
+            onPressed: _showLogoutConfirmDialog,
           ),
         ],
       ),
@@ -384,6 +433,49 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
               ),
             );
           }),
+          const SizedBox(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Branch Assemblies',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF16A34A),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                ),
+                onPressed: _showAddBranchDialog,
+                icon: const Icon(Icons.add_location_alt_rounded, size: 16),
+                label: const Text('Add Branch', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (_branches.isEmpty)
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  ChurchTranslations.tr('no_branches', lang: lang),
+                  style: const TextStyle(fontSize: 13, color: Colors.grey),
+                ),
+              ),
+            )
+          else
+            ..._branches.map((b) => Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFF16A34A),
+                      child: Icon(Icons.church_rounded, color: Colors.white, size: 20),
+                    ),
+                    title: Text(b['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text('Pastor: ${b['pastor']} | Contact: ${b['phone']}'),
+                  ),
+                )),
         ],
       ),
     );

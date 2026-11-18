@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rlds_church_app/core/theme/theme_provider.dart';
-import 'package:rlds_church_app/core/localization/church_translations.dart';
 import 'package:rlds_church_app/data/services/church_auth_session.dart';
 
 class ChurchMinistryHubScreen extends StatefulWidget {
@@ -28,9 +27,6 @@ class _ChurchMinistryHubScreenState extends State<ChurchMinistryHubScreen> with 
 
   @override
   Widget build(BuildContext context) {
-    final lang = AppStateNotifier.instance.currentLanguage;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF1E3A8A),

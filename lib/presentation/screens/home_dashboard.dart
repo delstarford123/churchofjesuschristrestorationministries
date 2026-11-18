@@ -8,8 +8,6 @@ import 'package:rlds_church_app/presentation/screens/digital_card_screen.dart';
 import 'package:rlds_church_app/presentation/screens/community_outreach_screen.dart';
 import 'package:rlds_church_app/presentation/screens/church_life_screen.dart';
 import 'package:rlds_church_app/presentation/screens/scripture_reader_view.dart';
-import 'package:rlds_church_app/presentation/screens/dashboards/super_admin_dashboard.dart';
-import 'package:rlds_church_app/presentation/screens/dashboards/executive_dashboard.dart';
 import 'package:rlds_church_app/presentation/screens/ministry/church_ministry_hub_screen.dart';
 import 'package:rlds_church_app/presentation/screens/auth/welcome_landing_screen.dart';
 import 'package:rlds_church_app/core/localization/church_translations.dart';
@@ -19,6 +17,7 @@ import 'package:rlds_church_app/data/repositories/church_sync_repository.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_bloc.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_event.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_state.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class HomeDashboard extends StatefulWidget {
   const HomeDashboard({super.key});
@@ -46,6 +45,32 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
         _isOnline = online;
       });
     }
+  }
+
+  void _showLogoutConfirmDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign Out / Logout'),
+        content: const Text('Are you sure you want to sign out from your church dashboard?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, foregroundColor: Colors.white),
+            onPressed: () {
+              Navigator.pop(ctx);
+              ChurchMemberSession.instance.clear();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const WelcomeLandingScreen()),
+                (route) => false,
+              );
+            },
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -115,7 +140,7 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                       ),
                       const Text(
-                        'Digital Sanctuary • Restoration Ministry',
+                        'Digital Zion • Restoration Ministry',
                         style: TextStyle(fontSize: 11, color: Colors.white70),
                       ),
                     ],
@@ -220,7 +245,7 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
                   ),
                 ),
                 Text(
-                  _isOnline ? '🟢 Connected to Sanctuary Cloud' : '🟡 Offline Mode (Local Storage Active)',
+                  _isOnline ? '🟢 Zion Online Network' : '🟡 Offline Mode (Local Storage Active)',
                   style: const TextStyle(
                     fontSize: 11,
                     color: Colors.white70,
@@ -229,6 +254,24 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
               ],
             ),
             actions: [
+              IconButton(
+                tooltip: 'Language / Lugha',
+                icon: const Icon(Icons.language_rounded, color: Colors.white),
+                onPressed: () {
+                  ChurchTranslations.showLanguagePickerModal(context, onLanguageChanged: () => setState(() {}));
+                },
+              ),
+              IconButton(
+                tooltip: 'Toggle Theme',
+                icon: Icon(
+                  AppStateNotifier.instance.isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  AppStateNotifier.instance.toggleTheme();
+                  setState(() {});
+                },
+              ),
               IconButton(
                 tooltip: 'Check Connection & Refresh',
                 icon: const Icon(Icons.sync_rounded, color: Colors.white),
@@ -267,6 +310,11 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
                     ),
                 ],
               ),
+              IconButton(
+                tooltip: 'Sign Out / Switch Account',
+                icon: const Icon(Icons.logout_rounded, color: Colors.white),
+                onPressed: _showLogoutConfirmDialog,
+              ),
             ],
             bottom: TabBar(
               controller: _tabController,
@@ -282,13 +330,42 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
               ],
             ),
           ),
-          body: TabBarView(
-            controller: _tabController,
+          body: Column(
             children: [
-              const TithesPaymentScreen(isEmbedded: true),
-              _LoanFormView(isOnline: _isOnline),
-              _QueueManagerView(queueCount: state.queueCount),
-              const _ChurchChatbotView(),
+              if (ChurchMemberSession.instance.role == ChurchRole.visitor)
+                Container(
+                  color: const Color(0xFFFEF3C7),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.info_outline_rounded, color: Color(0xFFD97706), size: 20),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          ChurchTranslations.tr('visitor_notice', lang: AppStateNotifier.instance.currentLanguage),
+                          style: const TextStyle(fontSize: 12, color: Color(0xFF92400E), fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const WelcomeLandingScreen()));
+                        },
+                        child: const Text('Sign In', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A))),
+                      ),
+                    ],
+                  ),
+                ),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    const TithesPaymentScreen(isEmbedded: true),
+                    _LoanFormView(isOnline: _isOnline),
+                    _QueueManagerView(queueCount: state.queueCount),
+                    const _ChurchChatbotView(),
+                  ],
+                ),
+              ),
             ],
           ),
         );
@@ -336,7 +413,32 @@ class _TitheFormViewState extends State<_TitheFormView> {
     super.dispose();
   }
 
+  void _showVisitorBlockedDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Member Registration Required'),
+        content: const Text('You are currently browsing as a Visitor. To apply for a Stewardship Kitty development loan, please register as an RLDS member or sign in with your membership credentials.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Dismiss')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E3A8A), foregroundColor: Colors.white),
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const WelcomeLandingScreen()));
+            },
+            child: const Text('Sign In / Register'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _submit() {
+    if (ChurchMemberSession.instance.role == ChurchRole.visitor) {
+      _showVisitorBlockedDialog();
+      return;
+    }
     if (_formKey.currentState!.validate()) {
       context.read<ChurchSyncBloc>().add(
             SubmitTitheEvent(
@@ -382,7 +484,7 @@ class _TitheFormViewState extends State<_TitheFormView> {
                     child: Text(
                       widget.isOnline
                           ? 'Online Mode: Contributions sync immediately with church records and trigger digital email receipts.'
-                          : 'Offline Sanctuary Mode: Contributions are saved securely in your Hive queue and sync when you regain internet.',
+                          : 'Offline Zion Mode: Contributions are saved securely in your Hive queue and sync when you regain internet.',
                       style: TextStyle(
                         fontSize: 12.5,
                         color: widget.isOnline ? const Color(0xFF1E3A8A) : const Color(0xFF92400E),
@@ -511,7 +613,32 @@ class _LoanFormViewState extends State<_LoanFormView> {
     super.dispose();
   }
 
+  void _showVisitorBlockedDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Member Registration Required'),
+        content: const Text('You are currently browsing as a Visitor. To apply for a Stewardship Kitty development loan, please register as an RLDS member or sign in with your membership credentials.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Dismiss')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E3A8A), foregroundColor: Colors.white),
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const WelcomeLandingScreen()));
+            },
+            child: const Text('Sign In / Register'),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _submit() {
+    if (ChurchMemberSession.instance.role == ChurchRole.visitor) {
+      _showVisitorBlockedDialog();
+      return;
+    }
     if (_formKey.currentState!.validate()) {
       context.read<ChurchSyncBloc>().add(
             SubmitLoanApplicationEvent(
@@ -751,7 +878,7 @@ class _QueueManagerView extends StatelessWidget {
 }
 
 // =========================================================================
-// TAB 4: CHURCH ASSISTANT CHATBOT VIEW
+// TAB 4: CHURCH ASSISTANT CHATBOT VIEW WITH OFFLINE AI & TTS
 // =========================================================================
 class _ChurchChatbotView extends StatefulWidget {
   const _ChurchChatbotView();
@@ -762,13 +889,169 @@ class _ChurchChatbotView extends StatefulWidget {
 
 class _ChurchChatbotViewState extends State<_ChurchChatbotView> {
   final _controller = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  late FlutterTts _flutterTts;
+  bool _isSpeaking = false;
+  int? _speakingIndex;
+  bool _autoSpeak = false;
+
   final List<Map<String, String>> _messages = [
     {
       'sender': 'bot',
-      'text': 'Greetings in Christ! Welcome to the RLDS Church Assistant. Ask me about Stewardship Kitty loans, tithes, service schedules, or membership registration.',
+      'text': 'Greetings in Christ! Welcome to the RLDS Church Assistant. Ask me about Stewardship Kitty loans, personal tithe records, service schedules, or scriptures.',
     }
   ];
   bool _isSending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTts();
+  }
+
+  void _initTts() {
+    _flutterTts = FlutterTts();
+    _flutterTts.setStartHandler(() {
+      if (mounted) setState(() => _isSpeaking = true);
+    });
+    _flutterTts.setCompletionHandler(() {
+      if (mounted) {
+        setState(() {
+          _isSpeaking = false;
+          _speakingIndex = null;
+        });
+      }
+    });
+    _flutterTts.setErrorHandler((_) {
+      if (mounted) {
+        setState(() {
+          _isSpeaking = false;
+          _speakingIndex = null;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _scrollController.dispose();
+    _flutterTts.stop();
+    super.dispose();
+  }
+
+  Future<void> _speak(String text, int index) async {
+    if (_isSpeaking && _speakingIndex == index) {
+      await _stopSpeech();
+      return;
+    }
+    await _stopSpeech();
+    final cleanText = text
+        .replaceAll(RegExp(r'[*#_`>•]'), '')
+        .replaceAll(RegExp(r'[🏛️🙏⛪📝🤝📖💰👤📊✅⚠️🤖📍]'), '')
+        .trim();
+    if (cleanText.isEmpty) return;
+
+    setState(() {
+      _isSpeaking = true;
+      _speakingIndex = index;
+    });
+    await _flutterTts.setSpeechRate(0.48);
+    await _flutterTts.setPitch(1.0);
+    await _flutterTts.speak(cleanText);
+  }
+
+  Future<void> _stopSpeech() async {
+    await _flutterTts.stop();
+    if (mounted) {
+      setState(() {
+        _isSpeaking = false;
+        _speakingIndex = null;
+      });
+    }
+  }
+
+  String _generateOfflineAiReply(String query) {
+    final q = query.toLowerCase();
+    final session = ChurchMemberSession.instance;
+
+    // 1. Identity & Profile
+    if (q.contains('who am i') || q.contains('my profile') || q.contains('my id') || q.contains('my details') || q.contains('my name')) {
+      if (session.isLoggedIn) {
+        return '👤 **Member Identity (Local Storage Cache):**\n\n'
+            '• **Full Name:** ${session.fullName}\n'
+            '• **Member ID:** ${session.memberId}\n'
+            '• **Role:** ${session.title}\n'
+            '• **Assigned Assembly:** ${session.assignedBranch}\n'
+            '• **Phone:** ${session.phone}\n'
+            '• **Status:** Active Member in Zion';
+      } else {
+        return '👋 You are currently in Visitor Mode. Please Sign In on the welcome screen to view your member profile.';
+      }
+    }
+
+    // 2. Personal Tithes & Giving
+    if (q.contains('my tithe') || q.contains('my contribution') || q.contains('how much') || q.contains('my giving') || q.contains('sadaka')) {
+      if (session.isLoggedIn) {
+        return '🙏 **Personal Tithes & Giving Record:**\n\n'
+            '• **Member:** ${session.fullName} (${session.memberId})\n'
+            '• **Branch Assembly:** ${session.assignedBranch}\n'
+            '• **Giving Status:** Up to date in church records.\n'
+            '• **Offline Giving:** You can enter contributions on the "Tithe" tab anytime; records queue in offline storage and sync automatically when internet is available.';
+      } else {
+        return '🙏 Tithes can be submitted on the Tithe tab. Sign in to link contributions to your official membership record.';
+      }
+    }
+
+    // 3. Stewardship Kitty Loans & Eligibility
+    if (q.contains('loan') || q.contains('kitty') || q.contains('borrow') || q.contains('eligible') || q.contains('credit score')) {
+      if (session.isLoggedIn) {
+        return '🏛️ **Stewardship Kitty Loan Guidelines:**\n\n'
+            '• **Member:** ${session.fullName}\n'
+            '• **Assembly:** ${session.assignedBranch}\n'
+            '• **Eligibility:** 3 consecutive months of recorded tithes & active guarantor required.\n'
+            '• **Apply Offline:** You can fill out the Stewardship Kitty loan form right now; applications queue safely in offline storage and submit when you reconnect.';
+      } else {
+        return '🏛️ The Stewardship Kitty provides interest-free development loans to consecrated members. Please register or sign in to verify eligibility.';
+      }
+    }
+
+    // 4. Restoration Scriptures
+    if (q.contains('scripture') || q.contains('bible') || q.contains('inspired version') || q.contains('book of mormon') || q.contains('nephi') || q.contains('enoch') || q.contains('zion')) {
+      return '📖 **Restoration Sacred Scriptures:**\n\n'
+          '• **Inspired Version (JST):** Corrected by Joseph Smith with restored Genesis passages (Enoch\'s Zion) and Matthew 24.\n'
+          '• **Book of Mormon:** Another witness of Jesus Christ from 1 Nephi through Moroni.\n'
+          '• **100% Offline:** All books, chapters, and verses are stored directly in this app for offline reading anytime.';
+    }
+
+    // 5. Worship Service Schedule
+    if (q.contains('service') || q.contains('time') || q.contains('schedule') || q.contains('sunday') || q.contains('prayer')) {
+      return '⛪ **Worship Service Schedule:**\n\n'
+          '• **Sunday Zion Worship:** 10:00 AM – 1:00 PM\n'
+          '• **Sunday School & Youth:** 9:00 AM – 10:00 AM\n'
+          '• **Wednesday Midweek Word & Prayer:** 6:00 PM – 7:30 PM\n'
+          '• **Saturday Youth Ministry Fellowship:** 3:00 PM – 5:00 PM';
+    }
+
+    // 6. Branch Locator & Pastor
+    if (q.contains('branch') || q.contains('pastor') || q.contains('location') || q.contains('kakamega') || q.contains('contact')) {
+      return '📍 **Branch Assemblies in Kenya:**\n\n'
+          '• **Kakamega Central Cathedral (Headquarters):** Pastor Samuel Makokha\n'
+          '• **Lurambi Assembly:** Elder Josephat Barasa\n'
+          '• **Malava Outreach Assembly:** Pastor Timothy Wekesa\n'
+          '• **Nairobi Metropolitan Fellowship:** Elder David Otieno\n'
+          'Check the "Events & Branch Assemblies" menu for GPS coordinates and contact phone numbers.';
+    }
+
+    return '🤖 **RLDS Church Assistant (Local AI):**\n\n'
+        'I am running on your device. I can answer questions about:\n'
+        '1. Your Member Profile & Branch (${session.assignedBranch})\n'
+        '2. Stewardship Kitty loans and eligibility\n'
+        '3. Tithes, offerings and offline sync\n'
+        '4. Inspired Version & Book of Mormon scriptures\n'
+        '5. Sunday service times and branch contacts\n\n'
+        'How may I serve you today?';
+  }
 
   void _sendMessage() async {
     final text = _controller.text.trim();
@@ -779,63 +1062,181 @@ class _ChurchChatbotViewState extends State<_ChurchChatbotView> {
       _isSending = true;
     });
     _controller.clear();
+    _scrollToBottom();
+
+    final session = ChurchMemberSession.instance;
+    String botReply = '';
 
     try {
-      final dio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl, connectTimeout: const Duration(seconds: 10)));
-      final res = await dio.post(ApiConstants.chatMessage, data: {'message': text});
-      if (mounted) {
-        setState(() {
-          _messages.add({
-            'sender': 'bot',
-            'text': res.data['reply'] ?? 'Response received.',
-          });
-        });
-      }
+      final dio = Dio(BaseOptions(
+        baseUrl: ApiConstants.baseUrl,
+        connectTimeout: const Duration(seconds: 7),
+        receiveTimeout: const Duration(seconds: 7),
+      ));
+      final res = await dio.post(
+        ApiConstants.chatMessage,
+        data: {
+          'message': text,
+          'member_id': session.memberId,
+          'email': session.email,
+          'phone': session.phone,
+          'full_name': session.fullName,
+          'branch': session.assignedBranch,
+          'role': session.role.name,
+        },
+      );
+      botReply = res.data['reply'] ?? _generateOfflineAiReply(text);
     } catch (_) {
+      botReply = _generateOfflineAiReply(text);
+    } finally {
       if (mounted) {
         setState(() {
-          _messages.add({
-            'sender': 'bot',
-            'text': 'Offline Assistant: For loan applications and tithes, you can fill out the respective tabs even without internet; the app will queue and sync them automatically.',
-          });
+          _messages.add({'sender': 'bot', 'text': botReply});
+          _isSending = false;
         });
+        _scrollToBottom();
+        if (_autoSpeak) {
+          _speak(botReply, _messages.length - 1);
+        }
       }
-    } finally {
-      if (mounted) setState(() => _isSending = false);
     }
+  }
+
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final lang = AppStateNotifier.instance.currentLanguage;
+
     return Column(
       children: [
+        // AI Chatbot Header with Status and Voice Auto-Speak Toggle
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            border: Border(bottom: BorderSide(color: Colors.grey.withAlpha(50))),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.support_agent_rounded, color: Color(0xFF1E3A8A), size: 22),
+              const SizedBox(width: 8),
+              Text(
+                ChurchTranslations.tr('ai_support', lang: lang),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              ),
+              const Spacer(),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _autoSpeak ? Icons.volume_up_rounded : Icons.volume_off_rounded,
+                    size: 16,
+                    color: _autoSpeak ? const Color(0xFF16A34A) : Colors.grey,
+                  ),
+                  const SizedBox(width: 4),
+                  const Text('Speak', style: TextStyle(fontSize: 11)),
+                  Switch(
+                    value: _autoSpeak,
+                    onChanged: (val) {
+                      setState(() => _autoSpeak = val);
+                      if (!val && _isSpeaking) _stopSpeech();
+                    },
+                    activeThumbColor: const Color(0xFF16A34A),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
         Expanded(
           child: ListView.builder(
+            controller: _scrollController,
             padding: const EdgeInsets.all(16),
             itemCount: _messages.length,
             itemBuilder: (context, i) {
               final msg = _messages[i];
               final isUser = msg['sender'] == 'user';
+              final isSpeakingThis = _isSpeaking && _speakingIndex == i;
+
               return Align(
                 alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  margin: const EdgeInsets.symmetric(vertical: 5),
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.78),
+                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.82),
                   decoration: BoxDecoration(
-                    color: isUser ? const Color(0xFF1E3A8A) : Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    color: isUser ? const Color(0xFF1E3A8A) : Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(14),
                     border: isUser ? null : Border.all(color: Colors.grey.shade300),
                     boxShadow: [
                       BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 4, offset: const Offset(0, 2)),
                     ],
                   ),
-                  child: Text(
-                    msg['text']!,
-                    style: TextStyle(
-                      color: isUser ? Colors.white : Colors.black87,
-                      fontSize: 13.5,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        msg['text']!,
+                        style: TextStyle(
+                          color: isUser ? Colors.white : (Theme.of(context).brightness == Brightness.dark ? Colors.white : Colors.black87),
+                          fontSize: 13.5,
+                        ),
+                      ),
+                      if (!isUser) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            InkWell(
+                              onTap: () => _speak(msg['text']!, i),
+                              borderRadius: BorderRadius.circular(16),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: isSpeakingThis
+                                      ? Colors.redAccent.withAlpha(20)
+                                      : const Color(0xFF1E3A8A).withAlpha(15),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      isSpeakingThis ? Icons.stop_circle_rounded : Icons.volume_up_rounded,
+                                      size: 16,
+                                      color: isSpeakingThis ? Colors.redAccent : const Color(0xFF1E3A8A),
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      isSpeakingThis
+                                          ? ChurchTranslations.tr('stop_speech', lang: lang)
+                                          : ChurchTranslations.tr('speak_response', lang: lang),
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSpeakingThis ? Colors.redAccent : const Color(0xFF1E3A8A),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               );
@@ -850,7 +1251,7 @@ class _ChurchChatbotViewState extends State<_ChurchChatbotView> {
         Container(
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).cardColor,
             boxShadow: [
               BoxShadow(color: Colors.black.withAlpha(12), blurRadius: 4, offset: const Offset(0, -1)),
             ],
@@ -860,8 +1261,8 @@ class _ChurchChatbotViewState extends State<_ChurchChatbotView> {
               Expanded(
                 child: TextField(
                   controller: _controller,
-                  decoration: const InputDecoration(
-                    hintText: 'Ask about loans, tithes, service times...',
+                  decoration: InputDecoration(
+                    hintText: ChurchTranslations.tr('ai_prompt', lang: lang),
                     border: InputBorder.none,
                   ),
                   onSubmitted: (_) => _sendMessage(),

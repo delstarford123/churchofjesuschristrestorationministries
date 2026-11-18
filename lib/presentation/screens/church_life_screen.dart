@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:rlds_church_app/core/constants/api_constants.dart';
+import 'package:rlds_church_app/core/localization/church_translations.dart';
+import 'package:rlds_church_app/core/theme/theme_provider.dart';
 
 class ChurchLifeScreen extends StatefulWidget {
   const ChurchLifeScreen({super.key});
@@ -15,38 +17,86 @@ class _ChurchLifeScreenState extends State<ChurchLifeScreen> {
   static const Color surfaceWhite = Color(0xFFFFFFFF);
   static const Color cleanNeutral = Color(0xFFF9FAFB);
 
-  bool _isSwahili = false;
   List<dynamic> _branches = [];
   bool _isLoadingBranches = true;
 
-  final List<Map<String, dynamic>> _events = [
-    {
-      'title': 'Grand Restoration Revival Crusade',
-      'date': 'Friday - Sunday • 4:00 PM',
-      'location': 'Muliro Gardens, Kakamega CBD',
-      'category': 'Crusade & Healing',
-      'rsvpd': false
-    },
-    {
-      'title': 'Stewardship Kitty Quarterly Review',
-      'date': 'Saturday • 2:00 PM',
-      'location': 'Cathedral Boardroom & Zoom',
-      'category': 'Governance',
-      'rsvpd': true
-    },
-    {
-      'title': 'Youth Fellowship & Worship Night',
-      'date': 'Next Friday • 6:30 PM',
-      'location': 'Lurambi Assembly Sanctuary',
-      'category': 'Youth Ministry',
-      'rsvpd': false
-    }
-  ];
+  List<Map<String, dynamic>> _events = [];
+  bool _isLoadingEvents = true;
 
   @override
   void initState() {
     super.initState();
     _fetchBranches();
+    _fetchEvents();
+  }
+
+  Future<void> _fetchEvents() async {
+    try {
+      final dio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl, connectTimeout: const Duration(seconds: 8)));
+      final res = await dio.get('/tech/events');
+      if (res.statusCode == 200 && mounted) {
+        final list = res.data['events'] as List? ?? [];
+        setState(() {
+          _events = list.map((e) => Map<String, dynamic>.from(e)).toList();
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _events = []);
+    } finally {
+      if (mounted) setState(() => _isLoadingEvents = false);
+    }
+  }
+
+  void _showAddEventDialog() {
+    final titleCtrl = TextEditingController();
+    final dateCtrl = TextEditingController(text: 'Upcoming Sabbath • 10:00 AM');
+    final locationCtrl = TextEditingController(text: 'Main Sanctuary Assembly');
+    final categoryCtrl = TextEditingController(text: 'Worship Service');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Publish Church Event / Retreat', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: 'Event / Retreat Title')),
+              const SizedBox(height: 8),
+              TextField(controller: dateCtrl, decoration: const InputDecoration(labelText: 'Date & Time')),
+              const SizedBox(height: 8),
+              TextField(controller: locationCtrl, decoration: const InputDecoration(labelText: 'Assembly Location / Venue')),
+              const SizedBox(height: 8),
+              TextField(controller: categoryCtrl, decoration: const InputDecoration(labelText: 'Category (Service, Retreat, Crusade)')),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: liturgicalBlue, foregroundColor: Colors.white),
+            onPressed: () {
+              if (titleCtrl.text.trim().isNotEmpty) {
+                setState(() {
+                  _events.insert(0, {
+                    'title': titleCtrl.text.trim(),
+                    'date': dateCtrl.text.trim(),
+                    'location': locationCtrl.text.trim(),
+                    'category': categoryCtrl.text.trim(),
+                    'rsvpd': false,
+                  });
+                });
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Event published successfully to church calendar!'), backgroundColor: Color(0xFF16A34A)),
+                );
+              }
+            },
+            child: const Text('Publish Event'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _fetchBranches() async {
@@ -153,15 +203,14 @@ class _ChurchLifeScreenState extends State<ChurchLifeScreen> {
         backgroundColor: liturgicalBlue,
         elevation: 0,
         title: Text(
-          _isSwahili ? 'Matawi na Matukio' : 'Events & Branch Assemblies',
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+          ChurchTranslations.tr('events_calendar', lang: AppStateNotifier.instance.currentLanguage),
+          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.white),
         ),
         actions: [
-          TextButton.icon(
-            style: TextButton.styleFrom(foregroundColor: Colors.white),
-            onPressed: () => setState(() => _isSwahili = !_isSwahili),
-            icon: const Icon(Icons.language_rounded, size: 18),
-            label: Text(_isSwahili ? 'SWA (🇰🇪)' : 'ENG (🇬🇧)', style: const TextStyle(fontWeight: FontWeight.bold)),
+          IconButton(
+            icon: Icon(AppStateNotifier.instance.isDarkMode ? Icons.light_mode_rounded : Icons.dark_mode_rounded, color: Colors.white),
+            tooltip: 'Toggle Theme',
+            onPressed: () => AppStateNotifier.instance.toggleTheme(),
           ),
         ],
       ),
@@ -249,59 +298,108 @@ class _ChurchLifeScreenState extends State<ChurchLifeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(Icons.event_available_rounded, color: stewardshipGold, size: 22),
-                        SizedBox(width: 8),
-                        Text(
-                          'Upcoming Events & Crusades',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                        const Row(
+                          children: [
+                            Icon(Icons.event_available_rounded, color: stewardshipGold, size: 22),
+                            SizedBox(width: 8),
+                            Text(
+                              'Upcoming Events & Retreats',
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                            ),
+                          ],
+                        ),
+                        TextButton.icon(
+                          onPressed: _showAddEventDialog,
+                          icon: const Icon(Icons.add_rounded, size: 16),
+                          label: const Text('Add Event', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
                     const SizedBox(height: 12),
-                    ..._events.map((e) {
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 10),
-                        padding: const EdgeInsets.all(12),
+                    if (_isLoadingEvents)
+                      const Center(child: CircularProgressIndicator())
+                    else if (_events.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: cleanNeutral,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: Colors.grey.shade200),
                         ),
-                        child: Row(
+                        child: Column(
                           children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(e['title'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF111827))),
-                                  Text('${e['date']} • ${e['location']}', style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280))),
-                                ],
-                              ),
+                            Icon(Icons.event_busy_rounded, size: 36, color: Colors.grey.shade400),
+                            const SizedBox(height: 8),
+                            Text(
+                              ChurchTranslations.tr('no_events', lang: AppStateNotifier.instance.currentLanguage),
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
                             ),
-                            ElevatedButton(
+                            const SizedBox(height: 12),
+                            ElevatedButton.icon(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: e['rsvpd'] ? const Color(0xFF16A34A) : liturgicalBlue,
+                                backgroundColor: stewardshipGold,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                               ),
-                              onPressed: () {
-                                setState(() => e['rsvpd'] = !e['rsvpd']);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(e['rsvpd'] ? 'RSVP Confirmed for ${e['title']}' : 'RSVP Cancelled'),
-                                    behavior: SnackBarBehavior.floating,
-                                  ),
-                                );
-                              },
-                              child: Text(e['rsvpd'] ? 'RSVP\'d ✓' : 'RSVP', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                              onPressed: _showAddEventDialog,
+                              icon: const Icon(Icons.add_rounded, size: 16),
+                              label: const Text('Publish New Event / Retreat', style: TextStyle(fontSize: 12)),
                             ),
                           ],
                         ),
-                      );
-                    }),
+                      )
+                    else
+                      ..._events.map((e) {
+                        final title = e['title'] ?? 'Church Gathering';
+                        final date = e['event_date'] ?? e['date'] ?? 'Upcoming';
+                        final location = e['location'] ?? 'Sanctuary Assembly';
+                        final rsvpd = e['rsvpd'] == true;
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: cleanNeutral,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF111827))),
+                                    Text('$date • $location', style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280))),
+                                  ],
+                                ),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: rsvpd ? const Color(0xFF16A34A) : liturgicalBlue,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                                onPressed: () {
+                                  setState(() => e['rsvpd'] = !rsvpd);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(!rsvpd ? 'RSVP Confirmed for $title' : 'RSVP Cancelled'),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                },
+                                child: Text(rsvpd ? 'RSVP\'d ✓' : 'RSVP', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
                   ],
                 ),
               ),

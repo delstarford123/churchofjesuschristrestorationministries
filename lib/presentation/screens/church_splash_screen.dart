@@ -70,7 +70,7 @@ class _ChurchSplashScreenState extends State<ChurchSplashScreen> {
               ),
               const SizedBox(height: 8),
               const Text(
-                'Digital Sanctuary & Stewardship Kitty',
+                'Digital Zion & Stewardship Kitty',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 14,
