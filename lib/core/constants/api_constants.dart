@@ -1,7 +1,7 @@
 class ApiConstants {
-  // Live Vercel Production Server URL
-  static const String baseUrl = 'https://harvion.delstarfordworks.co.ke/api/v1';
-  static const String fallbackVercelUrl = 'https://backend-fjf0xn0n2-delstarford-works.vercel.app/api/v1';
+  // Live Vercel Production Server URL (Dedicated RLDS Church project)
+  static const String baseUrl = 'https://rlds-church-backend.vercel.app/api/v1';
+  static const String fallbackVercelUrl = 'https://rlds-church-backend-hxfuq2fko-delstarford-works.vercel.app/api/v1';
 
   // Core Tithes & Offerings Endpoints
   static const String syncTithes = '/tithes/sync';
