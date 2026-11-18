@@ -7,6 +7,7 @@ import 'package:rlds_church_app/presentation/screens/kitty_analytics_screen.dart
 import 'package:rlds_church_app/presentation/screens/digital_card_screen.dart';
 import 'package:rlds_church_app/presentation/screens/community_outreach_screen.dart';
 import 'package:rlds_church_app/presentation/screens/church_life_screen.dart';
+import 'package:rlds_church_app/presentation/screens/scripture_reader_view.dart';
 import 'package:rlds_church_app/data/repositories/church_sync_repository.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_bloc.dart';
 import 'package:rlds_church_app/presentation/blocs/sync/church_sync_event.dart';
@@ -117,6 +118,15 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
                   onTap: () {
                     Navigator.pop(context);
                     _tabController.animateTo(0);
+                  },
+                ),
+                ListTile(
+                  leading: const Icon(Icons.menu_book_rounded, color: Color(0xFF1E3A8A)),
+                  title: const Text('Inspired Scriptures & Book of Mormon', style: TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: const Text('Pillar 1: IV Bible, BoM & Offline RAG AI', style: TextStyle(fontSize: 11)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ScriptureReaderView()));
                   },
                 ),
                 ListTile(
