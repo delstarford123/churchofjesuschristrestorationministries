@@ -70,7 +70,7 @@ class _ExecutiveDashboardState extends State<ExecutiveDashboard> with SingleTick
     final dateController = TextEditingController(text: 'Sunday, Dec 6, 2026');
     final timeController = TextEditingController(text: '10:00 AM');
     final speakerController = TextEditingController();
-    String branch = 'Kakamega Central Cathedral';
+    final branchController = TextEditingController(text: 'Main Sanctuary');
 
     showDialog(
       context: context,
@@ -87,6 +87,8 @@ class _ExecutiveDashboardState extends State<ExecutiveDashboard> with SingleTick
               TextField(controller: timeController, decoration: const InputDecoration(labelText: 'Time')),
               const SizedBox(height: 10),
               TextField(controller: speakerController, decoration: const InputDecoration(labelText: 'Speaker / Minister in Charge')),
+              const SizedBox(height: 10),
+              TextField(controller: branchController, decoration: const InputDecoration(labelText: 'Host Branch / Sanctuary')),
             ],
           ),
         ),
@@ -101,7 +103,7 @@ class _ExecutiveDashboardState extends State<ExecutiveDashboard> with SingleTick
                     'title': titleController.text.trim(),
                     'date': dateController.text.trim(),
                     'time': timeController.text.trim(),
-                    'branch': branch,
+                    'branch': branchController.text.trim(),
                     'speaker': speakerController.text.trim().isEmpty ? 'Ministerial Council' : speakerController.text.trim()
                   });
                 });

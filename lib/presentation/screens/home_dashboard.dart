@@ -11,6 +11,7 @@ import 'package:rlds_church_app/presentation/screens/scripture_reader_view.dart'
 import 'package:rlds_church_app/presentation/screens/dashboards/super_admin_dashboard.dart';
 import 'package:rlds_church_app/presentation/screens/dashboards/executive_dashboard.dart';
 import 'package:rlds_church_app/presentation/screens/ministry/church_ministry_hub_screen.dart';
+import 'package:rlds_church_app/presentation/screens/auth/welcome_landing_screen.dart';
 import 'package:rlds_church_app/core/localization/church_translations.dart';
 import 'package:rlds_church_app/core/theme/theme_provider.dart';
 import 'package:rlds_church_app/data/services/church_auth_session.dart';
@@ -121,24 +122,6 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
                   ),
                 ),
                 ListTile(
-                  leading: const Icon(Icons.admin_panel_settings_rounded, color: Colors.purple),
-                  title: const Text('Super Admin Portal', style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: const Text('Executive Appointments & System Oversight', style: TextStyle(fontSize: 11)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const SuperAdminDashboard()));
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.shield_rounded, color: Color(0xFFD97706)),
-                  title: const Text('Executive Council Portal', style: TextStyle(fontWeight: FontWeight.bold)),
-                  subtitle: const Text('Kitty Approvals, Events & Pastoral Care', style: TextStyle(fontSize: 11)),
-                  onTap: () {
-                    Navigator.pop(context);
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ExecutiveDashboard()));
-                  },
-                ),
-                ListTile(
                   leading: const Icon(Icons.hub_rounded, color: Color(0xFF16A34A)),
                   title: const Text('20 Sacred Ministry Portals', style: TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: const Text('Priesthood, Hymnal, Transparency & Records', style: TextStyle(fontSize: 11)),
@@ -208,6 +191,15 @@ class _HomeDashboardState extends State<HomeDashboard> with SingleTickerProvider
                   onTap: () {
                     Navigator.pop(context);
                     _tabController.animateTo(2);
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+                  title: const Text('Sign Out / Switch Account', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.redAccent)),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const WelcomeLandingScreen()));
                   },
                 ),
               ],

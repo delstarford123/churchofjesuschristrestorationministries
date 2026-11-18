@@ -55,19 +55,66 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
     },
   ];
 
-  // Branches
-  final List<Map<String, dynamic>> _branches = [
-    {'name': 'Kakamega Central Cathedral', 'pastor': 'Pastor Samuel Makokha', 'members': 420, 'phone': '+254712000001'},
-    {'name': 'Lurambi Assembly', 'pastor': 'Elder Josephat Barasa', 'members': 185, 'phone': '+254712000002'},
-    {'name': 'Malava Assembly', 'pastor': 'Pastor Timothy Wekesa', 'members': 210, 'phone': '+254712000003'},
-    {'name': 'Nairobi Metropolitan', 'pastor': 'Elder David Otieno', 'members': 140, 'phone': '+254712000004'},
-  ];
+  // Branches - created dynamically by Executive Members & Super Admin
+  final List<Map<String, dynamic>> _branches = [];
+
+  void _showAddBranchDialog() {
+    final branchNameCtrl = TextEditingController();
+    final pastorCtrl = TextEditingController();
+    final phoneCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Register New Branch Assembly', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: branchNameCtrl,
+              decoration: const InputDecoration(labelText: 'Assembly Name', hintText: 'e.g. Kakamega Central Assembly'),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: pastorCtrl,
+              decoration: const InputDecoration(labelText: 'Pastor in Charge'),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: phoneCtrl,
+              decoration: const InputDecoration(labelText: 'Contact Phone Number'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E3A8A), foregroundColor: Colors.white),
+            onPressed: () {
+              if (branchNameCtrl.text.trim().isNotEmpty) {
+                setState(() {
+                  _branches.add({
+                    'name': branchNameCtrl.text.trim(),
+                    'pastor': pastorCtrl.text.trim().isEmpty ? 'To be appointed' : pastorCtrl.text.trim(),
+                    'members': 0,
+                    'phone': phoneCtrl.text.trim(),
+                  });
+                });
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Create Assembly'),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showAddExecutiveDialog() {
     final nameController = TextEditingController();
     final phoneController = TextEditingController();
+    final branchController = TextEditingController(text: _branches.isNotEmpty ? _branches.first['name'] : 'Main Sanctuary');
     String selectedRole = 'Pastor';
-    String selectedBranch = 'Kakamega Central Cathedral';
 
     showDialog(
       context: context,
@@ -91,20 +138,23 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   value: selectedRole,
-                  decoration: const InputDecoration(labelText: 'Ministerial Title / Role'),
-                  items: ['Pastor', 'Elder', 'Bishop', 'Deacon', 'Deaconess']
-                      .map((r) => DropdownMenuItem(value: r, child: Text(r)))
-                      .toList(),
-                  onChanged: (val) => selectedRole = val ?? selectedRole,
+                  decoration: const InputDecoration(labelText: 'Priesthood / Executive Role', prefixIcon: Icon(Icons.shield)),
+                  items: const [
+                    DropdownMenuItem(value: 'Pastor', child: Text('Pastor (Assembly Leader)')),
+                    DropdownMenuItem(value: 'Presiding Elder', child: Text('Presiding Elder')),
+                    DropdownMenuItem(value: 'Stewardship Kitty Director', child: Text('Stewardship Kitty Director')),
+                    DropdownMenuItem(value: 'Church Secretary', child: Text('Church Secretary')),
+                    DropdownMenuItem(value: 'Treasurer', child: Text('Church Treasurer')),
+                    DropdownMenuItem(value: 'Head Deaconess', child: Text('Head Deaconess')),
+                  ],
+                  onChanged: (val) {
+                    if (val != null) selectedRole = val;
+                  },
                 ),
                 const SizedBox(height: 12),
-                DropdownButtonFormField<String>(
-                  value: selectedBranch,
-                  decoration: const InputDecoration(labelText: 'Branch Assembly Assignment'),
-                  items: _branches
-                      .map((b) => DropdownMenuItem(value: b['name'] as String, child: Text(b['name'] as String)))
-                      .toList(),
-                  onChanged: (val) => selectedBranch = val ?? selectedBranch,
+                TextField(
+                  controller: branchController,
+                  decoration: const InputDecoration(labelText: 'Assigned Branch Assembly', prefixIcon: Icon(Icons.church_rounded)),
                 ),
               ],
             ),
@@ -115,29 +165,25 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
               child: const Text('Cancel'),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1E3A8A)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A8A),
+                foregroundColor: Colors.white,
+              ),
               onPressed: () {
                 if (nameController.text.trim().isNotEmpty) {
                   setState(() {
                     _executives.add({
-                      'id': 'RLDS-EXEC-00${_executives.length + 1}',
                       'name': nameController.text.trim(),
                       'role': selectedRole,
-                      'branch': selectedBranch,
+                      'branch': branchController.text.trim(),
                       'phone': phoneController.text.trim().isEmpty ? '+254700000000' : phoneController.text.trim(),
                       'status': 'Active'
                     });
                   });
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Appointed ${nameController.text.trim()} to Executive Council'),
-                      backgroundColor: const Color(0xFF16A34A),
-                    ),
-                  );
                 }
               },
-              child: const Text('Confirm Appointment', style: TextStyle(color: Colors.white)),
+              child: const Text('Appoint Executive'),
             ),
           ],
         );

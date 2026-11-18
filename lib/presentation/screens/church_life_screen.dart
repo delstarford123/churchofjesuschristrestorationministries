@@ -57,32 +57,92 @@ class _ChurchLifeScreenState extends State<ChurchLifeScreen> {
         setState(() => _branches = res.data['branches'] ?? []);
       }
     } catch (_) {
-      // Fallback local list
-      setState(() {
-        _branches = [
-          {
-            'name': 'Kakamega Central Cathedral',
-            'pastor_in_charge': 'Pastor Samuel Makokha',
-            'contact_phone': '+254712000001',
-            'address': 'Cathedral Way, Kakamega CBD'
-          },
-          {
-            'name': 'Lurambi Assembly',
-            'pastor_in_charge': 'Elder Josephat Barasa',
-            'contact_phone': '+254712000002',
-            'address': 'Lurambi Junction, Webuye Highway'
-          },
-          {
-            'name': 'Malava Assembly & Outreach Centre',
-            'pastor_in_charge': 'Pastor Timothy Wekesa',
-            'contact_phone': '+254712000003',
-            'address': 'Malava Market Plaza, Kakamega North'
-          }
-        ];
-      });
+      // Empty by default - branches will be created dynamically by executive members
+      if (mounted) setState(() => _branches = []);
     } finally {
       if (mounted) setState(() => _isLoadingBranches = false);
     }
+  }
+
+  void _showAddBranchDialog() {
+    final nameCtrl = TextEditingController();
+    final countyCtrl = TextEditingController(text: 'Kakamega');
+    final pastorCtrl = TextEditingController();
+    final phoneCtrl = TextEditingController();
+    final addressCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Row(
+          children: [
+            Icon(Icons.add_business_rounded, color: liturgicalBlue),
+            SizedBox(width: 8),
+            Text('Register Assembly', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(labelText: 'Branch / Assembly Name', hintText: 'e.g. Kakamega Central Assembly'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: countyCtrl,
+                decoration: const InputDecoration(labelText: 'County / Region', hintText: 'e.g. Kakamega'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: pastorCtrl,
+                decoration: const InputDecoration(labelText: 'Pastor / Presiding Elder In Charge'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: phoneCtrl,
+                decoration: const InputDecoration(labelText: 'Contact Phone Number', hintText: 'e.g. +254712000000'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: addressCtrl,
+                decoration: const InputDecoration(labelText: 'Physical Address / Location Landmark'),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: liturgicalBlue, foregroundColor: Colors.white),
+            onPressed: () async {
+              final name = nameCtrl.text.trim();
+              if (name.isEmpty) return;
+
+              final newBranch = {
+                'name': name,
+                'county': countyCtrl.text.trim(),
+                'pastor_in_charge': pastorCtrl.text.trim(),
+                'contact_phone': phoneCtrl.text.trim(),
+                'address': addressCtrl.text.trim(),
+              };
+
+              try {
+                final dio = Dio(BaseOptions(baseUrl: ApiConstants.baseUrl));
+                await dio.post('/tech/branches', data: newBranch);
+              } catch (_) {}
+
+              setState(() {
+                _branches.insert(0, newBranch);
+              });
+              if (mounted) Navigator.pop(ctx);
+            },
+            child: const Text('Register'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -258,24 +318,70 @@ class _ChurchLifeScreenState extends State<ChurchLifeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Icon(Icons.location_on_rounded, color: liturgicalBlue, size: 22),
-                        SizedBox(width: 8),
-                        Text(
-                          'Church Branch Assemblies',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                        const Row(
+                          children: [
+                            Icon(Icons.location_on_rounded, color: liturgicalBlue, size: 22),
+                            SizedBox(width: 8),
+                            Text(
+                              'Church Branch Assemblies',
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                            ),
+                          ],
+                        ),
+                        TextButton.icon(
+                          onPressed: _showAddBranchDialog,
+                          icon: const Icon(Icons.add_rounded, size: 16),
+                          label: const Text('Add Assembly', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 2),
                     const Text(
-                      'RLDS assemblies across Kakamega County and Kenya',
+                      'Official assemblies registered by Church Executive Administration',
                       style: TextStyle(fontSize: 11.5, color: Color(0xFF6B7280)),
                     ),
                     const SizedBox(height: 12),
                     if (_isLoadingBranches)
                       const Center(child: CircularProgressIndicator())
+                    else if (_branches.isEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: cleanNeutral,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(Icons.church_rounded, size: 36, color: Colors.grey.shade400),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'No Branch Assemblies Registered Yet',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF111827)),
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Branch assemblies are registered directly by Executive Members and Church Administration.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
+                            ),
+                            const SizedBox(height: 12),
+                            ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: liturgicalBlue,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                              ),
+                              onPressed: _showAddBranchDialog,
+                              icon: const Icon(Icons.add_business_rounded, size: 16),
+                              label: const Text('Register New Branch Assembly', style: TextStyle(fontSize: 12)),
+                            ),
+                          ],
+                        ),
+                      )
                     else
                       ..._branches.map((b) {
                         return Container(

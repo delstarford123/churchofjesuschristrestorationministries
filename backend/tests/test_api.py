@@ -293,7 +293,16 @@ class RLDSChurchBackendTestCase(unittest.TestCase):
         self.assertEqual(trans_res.status_code, 200)
         self.assertIn('Fungu la Kumi', trans_res.get_json()['translations']['tithes_and_offerings'])
 
-        # Branch Locator
+        # Branch Locator - Dynamic creation by Executive & retrieval
+        create_res = self.client.post('/api/v1/tech/branches', json={
+            'name': 'Kakamega Central Assembly',
+            'county': 'Kakamega',
+            'pastor_in_charge': 'Pastor Samuel Makokha',
+            'contact_phone': '+254712000001',
+            'address': 'Cathedral Way, Kakamega CBD'
+        })
+        self.assertEqual(create_res.status_code, 201)
+
         branches_res = self.client.get('/api/v1/tech/branches')
         self.assertEqual(branches_res.status_code, 200)
         branches = branches_res.get_json()['branches']

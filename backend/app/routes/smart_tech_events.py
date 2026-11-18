@@ -133,68 +133,46 @@ def rsvp_to_event(current_user, event_id):
 
 
 # =========================================================================
-# 27. INTERACTIVE CHURCH BRANCH LOCATOR (Kakamega & Kenya Assemblies)
+# 27. INTERACTIVE CHURCH BRANCH LOCATOR (Dynamic Branch Management)
 # =========================================================================
-DEFAULT_BRANCHES = [
-    {
-        'branch_id': 'RLDS-BR-01',
-        'name': 'Kakamega Central Cathedral',
-        'county': 'Kakamega',
-        'pastor_in_charge': 'Pastor Samuel Makokha',
-        'contact_phone': '+254712000001',
-        'latitude': 0.2827,
-        'longitude': 34.7519,
-        'address': 'Cathedral Way, Kakamega CBD, near Muliro Gardens'
-    },
-    {
-        'branch_id': 'RLDS-BR-02',
-        'name': 'Lurambi Assembly',
-        'county': 'Kakamega',
-        'pastor_in_charge': 'Elder Josephat Barasa',
-        'contact_phone': '+254712000002',
-        'latitude': 0.3012,
-        'longitude': 34.7380,
-        'address': 'Lurambi Junction, Kakamega-Webuye Highway'
-    },
-    {
-        'branch_id': 'RLDS-BR-03',
-        'name': 'Malava Assembly & Outreach Centre',
-        'county': 'Kakamega',
-        'pastor_in_charge': 'Pastor Timothy Wekesa',
-        'contact_phone': '+254712000003',
-        'latitude': 0.4483,
-        'longitude': 34.8569,
-        'address': 'Malava Market Plaza, Kakamega North'
-    },
-    {
-        'branch_id': 'RLDS-BR-04',
-        'name': 'Nairobi Metropolitan Fellowship',
-        'county': 'Nairobi',
-        'pastor_in_charge': 'Elder David Otieno',
-        'contact_phone': '+254712000004',
-        'latitude': -1.286389,
-        'longitude': 36.817223,
-        'address': 'Upper Hill Sanctuary, Nairobi'
-    }
-]
 
 @smart_tech_bp.route('/branches', methods=['GET'])
 def get_church_branches():
     """Retrieve GPS coordinates and pastor contacts for RLDS branches across Kenya."""
-    db_branches = ChurchBranch.query.all()
-    if not db_branches:
-        # Seed default branches if table is empty
-        for b in DEFAULT_BRANCHES:
-            new_b = ChurchBranch(**b)
-            db.session.add(new_b)
-        db.session.commit()
-        db_branches = ChurchBranch.query.all()
-
+    db_branches = ChurchBranch.query.order_by(ChurchBranch.id.desc()).all()
     return jsonify({
         'status': 'success',
         'count': len(db_branches),
-        'branches': [b.to_dict() for b in db_branches]
+        'branches': [b.to_dict() for b in db_branches],
+        'message': 'Branches loaded.' if db_branches else 'No branch assemblies created yet. Executive members or Super Admins can register new branches.'
     }), 200
+
+
+@smart_tech_bp.route('/branches', methods=['POST'])
+def create_church_branch():
+    """Allow Executive Members and Super Admins to create realistic branch assemblies."""
+    data = request.get_json() or {}
+    name = data.get('name')
+    if not name:
+        return jsonify({'status': 'error', 'message': 'Branch assembly name is required'}), 400
+
+    branch = ChurchBranch(
+        branch_id=data.get('branch_id') or f"RLDS-BR-{uuid.uuid4().hex[:6].upper()}",
+        name=name.strip(),
+        county=data.get('county', 'Kenya').strip(),
+        pastor_in_charge=data.get('pastor_in_charge', 'Presiding Elder').strip(),
+        contact_phone=data.get('contact_phone', '').strip(),
+        latitude=float(data.get('latitude', 0.0)),
+        longitude=float(data.get('longitude', 0.0)),
+        address=data.get('address', 'Sanctuary Hall').strip()
+    )
+    db.session.add(branch)
+    db.session.commit()
+    return jsonify({
+        'status': 'success',
+        'message': f'Branch assembly "{branch.name}" created successfully by Executive Ministry.',
+        'branch': branch.to_dict()
+    }), 201
 
 
 # =========================================================================

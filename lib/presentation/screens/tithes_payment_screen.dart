@@ -895,110 +895,116 @@ class _TithesPaymentScreenState extends State<TithesPaymentScreen> with SingleTi
                       ),
                       const SizedBox(height: 16),
                       SizedBox(
-                        height: 170,
+                        height: 220,
                         child: TabBarView(
                           controller: _paymentMethodTabController,
                           children: [
                             // TAB A: STK PUSH (Lipa Na M-Pesa Online)
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                TextFormField(
-                                  controller: _phoneController,
-                                  keyboardType: TextInputType.phone,
-                                  decoration: InputDecoration(
-                                    labelText: 'Safaricom Phone Number',
-                                    hintText: '0712345678 or 254712345678',
-                                    prefixIcon: const Icon(Icons.phone_iphone_rounded, color: mpesaGreen),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                            SingleChildScrollView(
+                              physics: const BouncingScrollPhysics(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  TextFormField(
+                                    controller: _phoneController,
+                                    keyboardType: TextInputType.phone,
+                                    decoration: InputDecoration(
+                                      labelText: 'Safaricom Phone Number',
+                                      hintText: '0712345678 or 254712345678',
+                                      prefixIcon: const Icon(Icons.phone_iphone_rounded, color: mpesaGreen),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                    validator: (v) => v == null || v.isEmpty ? 'Enter phone number' : null,
                                   ),
-                                  validator: (v) => v == null || v.isEmpty ? 'Enter phone number' : null,
-                                ),
-                                const SizedBox(height: 14),
-                                ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: mpesaGreen,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 14),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                    elevation: 2,
+                                  const SizedBox(height: 14),
+                                  ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: mpesaGreen,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      elevation: 2,
+                                    ),
+                                    onPressed: () => _submitContribution(isStkPush: true),
+                                    icon: const Icon(Icons.send_to_mobile_rounded),
+                                    label: const Text(
+                                      'Send M-Pesa STK PIN Prompt',
+                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                    ),
                                   ),
-                                  onPressed: () => _submitContribution(isStkPush: true),
-                                  icon: const Icon(Icons.send_to_mobile_rounded),
-                                  label: const Text(
-                                    'Send M-Pesa STK PIN Prompt',
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
 
                             // TAB B: PAYBILL MANUAL ENTRY
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: cleanNeutral,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.grey.shade200),
+                            SingleChildScrollView(
+                              physics: const BouncingScrollPhysics(),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      color: cleanNeutral,
+                                      borderRadius: BorderRadius.circular(10),
+                                      border: Border.all(color: Colors.grey.shade200),
+                                    ),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text('Church Paybill:', style: TextStyle(fontSize: 11, color: textSlateGrey)),
+                                            const Text('174379', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: textCharcoal)),
+                                          ],
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.copy_rounded, size: 16, color: liturgicalBlue),
+                                          onPressed: () => _copyToClipboard('174379', 'Paybill Number'),
+                                        ),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text('Account Number:', style: TextStyle(fontSize: 11, color: textSlateGrey)),
+                                            Text(_selectedCategory.split(' ').first, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: liturgicalBlue)),
+                                          ],
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.copy_rounded, size: 16, color: liturgicalBlue),
+                                          onPressed: () => _copyToClipboard(_selectedCategory.split(' ').first, 'Account Reference'),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Text('Church Paybill:', style: TextStyle(fontSize: 11, color: textSlateGrey)),
-                                          const Text('174379', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: textCharcoal)),
-                                        ],
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.copy_rounded, size: 16, color: liturgicalBlue),
-                                        onPressed: () => _copyToClipboard('174379', 'Paybill Number'),
-                                      ),
-                                      Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          const Text('Account Number:', style: TextStyle(fontSize: 11, color: textSlateGrey)),
-                                          Text(_selectedCategory.split(' ').first, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: liturgicalBlue)),
-                                        ],
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(Icons.copy_rounded, size: 16, color: liturgicalBlue),
-                                        onPressed: () => _copyToClipboard(_selectedCategory.split(' ').first, 'Account Reference'),
-                                      ),
-                                    ],
+                                  const SizedBox(height: 12),
+                                  TextFormField(
+                                    controller: _receiptController,
+                                    textCapitalization: TextCapitalization.characters,
+                                    decoration: InputDecoration(
+                                      labelText: 'M-Pesa Confirmation Code (e.g. QWE4827X12)',
+                                      prefixIcon: const Icon(Icons.receipt_long_rounded, color: liturgicalBlue),
+                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 12),
-                                TextFormField(
-                                  controller: _receiptController,
-                                  textCapitalization: TextCapitalization.characters,
-                                  decoration: InputDecoration(
-                                    labelText: 'M-Pesa Confirmation Code (e.g. QWE4827X12)',
-                                    prefixIcon: const Icon(Icons.receipt_long_rounded, color: liturgicalBlue),
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                                  const SizedBox(height: 12),
+                                  ElevatedButton.icon(
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: liturgicalBlue,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(vertical: 13),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                    onPressed: () => _submitContribution(isStkPush: false),
+                                    icon: const Icon(Icons.check_circle_outline_rounded),
+                                    label: Text(
+                                      _isOnline ? 'Verify & Generate Official Receipt' : 'Log Receipt Offline (Hive)',
+                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(height: 12),
-                                ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: liturgicalBlue,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 13),
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                  ),
-                                  onPressed: () => _submitContribution(isStkPush: false),
-                                  icon: const Icon(Icons.check_circle_outline_rounded),
-                                  label: Text(
-                                    _isOnline ? 'Verify & Generate Official Receipt' : 'Log Receipt Offline (Hive)',
-                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
                         ),

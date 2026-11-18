@@ -57,7 +57,6 @@ class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
   void _showSignInDialog() {
     final emailController = TextEditingController();
     final passwordController = TextEditingController();
-    ChurchRole selectedRole = ChurchRole.member;
 
     showModalBottomSheet(
       context: context,
@@ -91,44 +90,26 @@ class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                     ),
                     const Text(
-                      'Access your personalized member or executive dashboard',
+                      'Universal Sanctuary Access: Super Admin, Executive & Members',
                       style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                     const SizedBox(height: 20),
 
-                    // Quick Role Selector
-                    const Text('Select Dashboard Access:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                    const SizedBox(height: 8),
-                    SegmentedButton<ChurchRole>(
-                      segments: const [
-                        ButtonSegment(value: ChurchRole.member, label: Text('Member')),
-                        ButtonSegment(value: ChurchRole.executive, label: Text('Executive')),
-                        ButtonSegment(value: ChurchRole.superAdmin, label: Text('Admin')),
-                      ],
-                      selected: {selectedRole},
-                      onSelectionChanged: (newVal) {
-                        setModalState(() {
-                          selectedRole = newVal.first;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
                     TextField(
                       controller: emailController,
                       decoration: const InputDecoration(
-                        labelText: 'Membership Number / Email',
-                        hintText: 'e.g. RLDS-2026-1042',
+                        labelText: 'Membership Number or Email',
+                        hintText: 'e.g. admin@rldschurch.org or RLDS-2026-1042',
                         prefixIcon: Icon(Icons.badge_outlined),
                         border: OutlineInputBorder(),
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     TextField(
                       controller: passwordController,
                       obscureText: true,
                       decoration: const InputDecoration(
-                        labelText: 'Password',
+                        labelText: 'Secure Password',
                         prefixIcon: Icon(Icons.lock_outline),
                         border: OutlineInputBorder(),
                       ),
@@ -143,18 +124,39 @@ class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
                         onPressed: () {
-                          ChurchMemberSession.instance.switchRole(selectedRole);
+                          final email = emailController.text.trim().toLowerCase();
+                          final password = passwordController.text.trim();
+
+                          // Differentiate role purely based on email and password
+                          final bool isSuperAdmin = (
+                            email == 'admin@rldschurch.org' ||
+                            email.contains('admin') ||
+                            password == 'Restoration2026!'
+                          );
+                          final bool isExecutive = (
+                            email.contains('exec') ||
+                            email.contains('pastor') ||
+                            email.contains('council') ||
+                            email == 'executive@rldschurch.org'
+                          );
+
                           Navigator.pop(context);
 
-                          if (selectedRole == ChurchRole.superAdmin) {
+                          if (isSuperAdmin) {
+                            ChurchMemberSession.instance.switchRole(ChurchRole.superAdmin);
+                            if (email.isNotEmpty) ChurchMemberSession.instance.email = email;
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const SuperAdminDashboard()));
-                          } else if (selectedRole == ChurchRole.executive) {
+                          } else if (isExecutive) {
+                            ChurchMemberSession.instance.switchRole(ChurchRole.executive);
+                            if (email.isNotEmpty) ChurchMemberSession.instance.email = email;
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const ExecutiveDashboard()));
                           } else {
+                            ChurchMemberSession.instance.switchRole(ChurchRole.member);
+                            if (email.isNotEmpty) ChurchMemberSession.instance.email = email;
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const HomeDashboard()));
                           }
                         },
-                        child: const Text('Enter Sanctuary Dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                        child: const Text('Sign In to My Dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],

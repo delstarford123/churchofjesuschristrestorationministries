@@ -17,7 +17,7 @@ class ChurchMemberSession extends ChangeNotifier {
   String phone = '+254712000001';
   ChurchRole role = ChurchRole.executive;
   String title = 'Pastor in Charge';
-  String branch = 'Kakamega Central Cathedral';
+  String branch = 'Restoration Fellowship Assembly';
 
   bool get isSuperAdmin => role == ChurchRole.superAdmin;
   bool get isExecutive => role == ChurchRole.executive || role == ChurchRole.superAdmin;
