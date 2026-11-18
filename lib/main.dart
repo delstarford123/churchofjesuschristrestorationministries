@@ -16,6 +16,10 @@ void main() async {
   await Hive.openBox('offline_queue');
   await Hive.openBox('auth_cache');
   await Hive.openBox('church_content_cache');
+  await Hive.openBox('app_settings');
+
+  // Load and apply user persisted theme mode & language settings
+  await AppStateNotifier.instance.init();
 
   // Load centralized translations
   await ChurchTranslations.loadTranslations();

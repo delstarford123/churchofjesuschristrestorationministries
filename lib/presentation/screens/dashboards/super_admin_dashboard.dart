@@ -3,6 +3,8 @@ import 'package:rlds_church_app/core/localization/church_translations.dart';
 import 'package:rlds_church_app/core/theme/theme_provider.dart';
 import 'package:rlds_church_app/data/services/church_auth_session.dart';
 import 'package:rlds_church_app/presentation/screens/auth/welcome_landing_screen.dart';
+import 'package:rlds_church_app/presentation/screens/ministry/church_ministry_hub_screen.dart';
+import 'package:rlds_church_app/presentation/screens/scripture_reader_view.dart';
 
 class SuperAdminDashboard extends StatefulWidget {
   const SuperAdminDashboard({super.key});
@@ -285,6 +287,13 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
             },
           ),
           IconButton(
+            icon: const Icon(Icons.history_edu_rounded, color: Colors.white),
+            tooltip: 'Sacred Ministry & Records',
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ChurchMinistryHubScreen()));
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.person_add_rounded, color: Color(0xFFD97706)),
             tooltip: 'Appoint Executive Member',
             onPressed: _showAddExecutiveDialog,
@@ -340,7 +349,77 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
+
+          // Quick Canonical & Sacred Ministry Gateways
+          Row(
+            children: [
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ChurchMinistryHubScreen()));
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E3A8A).withAlpha(15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFF1E3A8A).withAlpha(40)),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.history_edu_rounded, color: Color(0xFF1E3A8A), size: 22),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Sacred Records', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E3A8A))),
+                              Text('20 Live Modules', style: TextStyle(fontSize: 10.5, color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: InkWell(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const ScriptureReaderView()));
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD97706).withAlpha(15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFD97706).withAlpha(40)),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.auto_stories_rounded, color: Color(0xFFD97706), size: 22),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Scriptures', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFFD97706))),
+                              Text('IV Bible & BoM', style: TextStyle(fontSize: 10.5, color: Colors.grey)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
 
           // Overview Statistics
           Row(
@@ -437,9 +516,12 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Branch Assemblies',
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              const Expanded(
+                child: Text(
+                  'Branch Assemblies',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
@@ -472,8 +554,8 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
                       backgroundColor: Color(0xFF16A34A),
                       child: Icon(Icons.church_rounded, color: Colors.white, size: 20),
                     ),
-                    title: Text(b['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('Pastor: ${b['pastor']} | Contact: ${b['phone']}'),
+                    title: Text(b['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                    subtitle: Text('Pastor: ${b['pastor']} | Contact: ${b['phone']}', overflow: TextOverflow.ellipsis),
                   ),
                 )),
         ],

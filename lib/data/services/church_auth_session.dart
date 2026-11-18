@@ -21,9 +21,11 @@ class ChurchMemberSession extends ChangeNotifier {
 
   bool get isSuperAdmin => role == ChurchRole.superAdmin;
   bool get isExecutive => role == ChurchRole.executive || role == ChurchRole.superAdmin;
+  bool get isExecutiveOrAdmin => isExecutive;
   bool get isMember => role == ChurchRole.member || role == ChurchRole.executive || role == ChurchRole.superAdmin;
   bool get isLoggedIn => role != ChurchRole.visitor && memberId.isNotEmpty;
   String get assignedBranch => branch.isNotEmpty ? branch : 'Kakamega Central Cathedral';
+  String get membershipNumber => memberId;
 
   void clear() {
     memberId = '';

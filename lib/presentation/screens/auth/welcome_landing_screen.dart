@@ -68,7 +68,7 @@ class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
                       controller: emailController,
                       decoration: const InputDecoration(
                         labelText: 'Membership Number or Email',
-                        hintText: 'e.g. admin@rldschurch.org or RLDS-2026-1042',
+                        hintText: 'e.g. delstarfordisaiah@gmail.com or RLDS-2026-1042',
                         prefixIcon: Icon(Icons.badge_outlined),
                         border: OutlineInputBorder(),
                       ),
@@ -98,8 +98,10 @@ class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
 
                           // Differentiate role purely based on email and password
                           final bool isSuperAdmin = (
+                            email == 'delstarfordisaiah@gmail.com' ||
                             email == 'admin@rldschurch.org' ||
                             email.contains('admin') ||
+                            password == 'Delstarford123' ||
                             password == 'Restoration2026!'
                           );
                           final bool isExecutive = (
@@ -113,7 +115,9 @@ class _WelcomeLandingScreenState extends State<WelcomeLandingScreen> {
 
                           if (isSuperAdmin) {
                             ChurchMemberSession.instance.switchRole(ChurchRole.superAdmin);
-                            if (email.isNotEmpty) ChurchMemberSession.instance.email = email;
+                            ChurchMemberSession.instance.fullName = 'Delstarford Isaiah';
+                            ChurchMemberSession.instance.email = email.isNotEmpty ? email : 'delstarfordisaiah@gmail.com';
+                            ChurchMemberSession.instance.memberId = 'RLDS-ADMIN-001';
                             Navigator.push(context, MaterialPageRoute(builder: (_) => const SuperAdminDashboard()));
                           } else if (isExecutive) {
                             ChurchMemberSession.instance.switchRole(ChurchRole.executive);

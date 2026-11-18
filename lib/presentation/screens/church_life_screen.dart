@@ -301,15 +301,20 @@ class _ChurchLifeScreenState extends State<ChurchLifeScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.event_available_rounded, color: stewardshipGold, size: 22),
-                            SizedBox(width: 8),
-                            Text(
-                              'Upcoming Events & Retreats',
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
-                            ),
-                          ],
+                        const Expanded(
+                          child: Row(
+                            children: [
+                              Icon(Icons.event_available_rounded, color: stewardshipGold, size: 22),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Upcoming Events & Retreats',
+                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         TextButton.icon(
                           onPressed: _showAddEventDialog,
@@ -419,15 +424,20 @@ class _ChurchLifeScreenState extends State<ChurchLifeScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Row(
-                          children: [
-                            Icon(Icons.location_on_rounded, color: liturgicalBlue, size: 22),
-                            SizedBox(width: 8),
-                            Text(
-                              'Church Branch Assemblies',
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
-                            ),
-                          ],
+                        const Expanded(
+                          child: Row(
+                            children: [
+                              Icon(Icons.location_on_rounded, color: liturgicalBlue, size: 22),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Church Branch Assemblies',
+                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF111827)),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         TextButton.icon(
                           onPressed: _showAddBranchDialog,
@@ -505,9 +515,9 @@ class _ChurchLifeScreenState extends State<ChurchLifeScreen> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(b['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF111827))),
-                                    Text('${b['address']}', style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280))),
-                                    Text('Pastor: ${b['pastor_in_charge']} • ${b['contact_phone']}', style: const TextStyle(fontSize: 10.5, color: stewardshipGold, fontWeight: FontWeight.w600)),
+                                    Text(b['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF111827)), overflow: TextOverflow.ellipsis),
+                                    Text('${b['address']}', style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)), overflow: TextOverflow.ellipsis),
+                                    Text('Pastor: ${b['pastor_in_charge']} • ${b['contact_phone']}', style: const TextStyle(fontSize: 10.5, color: stewardshipGold, fontWeight: FontWeight.w600), overflow: TextOverflow.ellipsis),
                                   ],
                                 ),
                               ),

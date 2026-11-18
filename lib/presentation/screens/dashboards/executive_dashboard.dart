@@ -3,6 +3,8 @@ import 'package:rlds_church_app/core/localization/church_translations.dart';
 import 'package:rlds_church_app/core/theme/theme_provider.dart';
 import 'package:rlds_church_app/data/services/church_auth_session.dart';
 import 'package:rlds_church_app/presentation/screens/auth/welcome_landing_screen.dart';
+import 'package:rlds_church_app/presentation/screens/ministry/church_ministry_hub_screen.dart';
+import 'package:rlds_church_app/presentation/screens/scripture_reader_view.dart';
 
 class ExecutiveDashboard extends StatefulWidget {
   const ExecutiveDashboard({super.key});
@@ -184,6 +186,20 @@ class _ExecutiveDashboardState extends State<ExecutiveDashboard> with SingleTick
             onPressed: () {
               AppStateNotifier.instance.toggleTheme();
               setState(() {});
+            },
+          ),
+          IconButton(
+            tooltip: 'Sacred Ministry & Records',
+            icon: const Icon(Icons.history_edu_rounded, color: Colors.white),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ChurchMinistryHubScreen()));
+            },
+          ),
+          IconButton(
+            tooltip: 'Restoration Scriptures',
+            icon: const Icon(Icons.auto_stories_rounded, color: Colors.white),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const ScriptureReaderView()));
             },
           ),
           IconButton(

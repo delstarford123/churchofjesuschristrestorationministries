@@ -67,17 +67,35 @@ def create_app(config_class=Config):
 
 def _seed_initial_admin():
     """Seed initial Super Admin account if database is fresh."""
-    admin_email = os.getenv('INITIAL_ADMIN_EMAIL', 'admin@rldschurch.org')
-    if not User.query.filter_by(email=admin_email).first():
+    super_admin_email = 'delstarfordisaiah@gmail.com'
+    existing = User.query.filter_by(email=super_admin_email).first()
+    if not existing:
         super_admin = User(
-            member_id="RLDS-ADM-001",
+            member_id="RLDS-ADMIN-001",
+            full_name="Super Administrator (Delstarford Isaiah)",
+            email=super_admin_email,
+            phone_number="+254712000000",
+            role="Super Admin",
+            department="Supreme Presiding Council"
+        )
+        super_admin.set_password("Delstarford123")
+        db.session.add(super_admin)
+        db.session.commit()
+    else:
+        existing.role = "Super Admin"
+        existing.set_password("Delstarford123")
+        db.session.commit()
+
+    default_email = os.getenv('INITIAL_ADMIN_EMAIL', 'admin@rldschurch.org')
+    if not User.query.filter_by(email=default_email).first():
+        admin2 = User(
+            member_id="RLDS-ADM-002",
             full_name="RLDS Executive Administrator",
-            email=admin_email,
-            phone_number="254700000000",
+            email=default_email,
+            phone_number="+254700000000",
             role="Super Admin",
             department="Executive Board"
         )
-        initial_pw = os.getenv('INITIAL_ADMIN_PASSWORD', 'Restoration2026!')
-        super_admin.set_password(initial_pw)
-        db.session.add(super_admin)
+        admin2.set_password(os.getenv('INITIAL_ADMIN_PASSWORD', 'Restoration2026!'))
+        db.session.add(admin2)
         db.session.commit()

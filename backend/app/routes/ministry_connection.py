@@ -43,7 +43,19 @@ def get_priesthood_lineages():
 # 2. SACRAMENT SICK VISITATION
 @ministry_bp.route('/visitations', methods=['GET'])
 def get_visitations():
-    records = SacramentVisitation.query.all()
+    records = SacramentVisitation.query.order_by(SacramentVisitation.visit_date.desc()).all()
+    if not records:
+        sample_v = SacramentVisitation(
+            member_id='RLDS-2026-1092',
+            member_name='Sister Martha Nakhumicha (Lurambi)',
+            home_address='Lurambi Sub-county',
+            visiting_deacon_or_elder='Deaconess Mary Namalwa',
+            welfare_needs='Food basket delivered and prescription assistance',
+            prayer_requests='Healing, fellowship & Holy Communion administered'
+        )
+        db.session.add(sample_v)
+        db.session.commit()
+        records = [sample_v]
     return jsonify({'status': 'success', 'records': [r.to_dict() for r in records]}), 200
 
 @ministry_bp.route('/visitations', methods=['POST'])
@@ -110,8 +122,37 @@ def get_hymnal():
 # 6. MARRIAGE REGISTRY
 @ministry_bp.route('/marriage-registry', methods=['GET'])
 def get_marriage_records():
-    records = MarriageRegistry.query.all()
+    records = MarriageRegistry.query.order_by(MarriageRegistry.wedding_date.desc()).all()
+    if not records:
+        sample_m = MarriageRegistry(
+            certificate_number='RLDS-MAR-2026-08',
+            groom_name='Brother David Omondi',
+            bride_name='Sister Grace Auma',
+            wedding_date=date(2026, 4, 18),
+            officiant_elder='Pastor Samuel Makokha',
+            assembly_location='Kakamega Central Cathedral',
+            premarital_counseling_completed=True
+        )
+        db.session.add(sample_m)
+        db.session.commit()
+        records = [sample_m]
     return jsonify({'status': 'success', 'marriages': [r.to_dict() for r in records]}), 200
+
+@ministry_bp.route('/marriage-registry', methods=['POST'])
+def add_marriage_record():
+    data = request.get_json() or {}
+    record = MarriageRegistry(
+        certificate_number=f"RLDS-MAR-{uuid.uuid4().hex[:6].upper()}",
+        groom_name=data.get('groom_name', ''),
+        bride_name=data.get('bride_name', ''),
+        wedding_date=date.today(),
+        officiant_elder=data.get('officiant_elder', 'Pastor Samuel Makokha'),
+        assembly_location=data.get('assembly_location', 'Kakamega Central Cathedral'),
+        premarital_counseling_completed=True
+    )
+    db.session.add(record)
+    db.session.commit()
+    return jsonify({'status': 'success', 'record': record.to_dict()}), 201
 
 # 7. SUNDAY SCHOOL BADGES
 @ministry_bp.route('/sunday-school/badges', methods=['GET'])
@@ -127,6 +168,17 @@ def get_prayer_wall():
         prayers = PrayerRequestWall.query.order_by(PrayerRequestWall.created_at.desc()).all()
     else:
         prayers = PrayerRequestWall.query.filter_by(is_confidential=False).order_by(PrayerRequestWall.created_at.desc()).all()
+    if not prayers:
+        sample_p = PrayerRequestWall(
+            member_id='RLDS-2026-1044',
+            requester_name='Sister Mary Nakhumicha',
+            is_confidential=False,
+            title='Healing & Divine Protection',
+            request_text='Praying for divine health and strength upon all mothers and children in Malava and Lurambi assemblies.'
+        )
+        db.session.add(sample_p)
+        db.session.commit()
+        prayers = [sample_p]
     return jsonify({'status': 'success', 'prayers': [p.to_dict() for p in prayers]}), 200
 
 @ministry_bp.route('/prayer-wall', methods=['POST'])
