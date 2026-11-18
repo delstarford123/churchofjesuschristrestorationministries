@@ -58,3 +58,8 @@ __pycache__/
 venv/
 ENV/
 .vercel
+
+# Firebase Credentials (Confidential)
+serviceAccountKey*.json
+*serviceAccount*.json
+firebase-credentials.json

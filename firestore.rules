@@ -1,0 +1,289 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // HELPER FUNCTIONS & RBAC ENFORCEMENT
+    // =========================================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isUser(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function getUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function userRole() {
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? getUserDoc().role
+        : 'Visitor';
+    }
+
+    function isLeadership() {
+      return isAuthenticated() && (
+        userRole() in ['Pastor', 'Elder', 'Executive Director', 'Bishop', 'Admin']
+      );
+    }
+
+    function isDeaconOrAbove() {
+      return isAuthenticated() && (
+        userRole() in ['Deacon', 'Pastor', 'Elder', 'Executive Director', 'Bishop', 'Admin']
+      );
+    }
+
+    function isSundaySchoolTeacher() {
+      return isAuthenticated() && (
+        userRole() in ['Sunday School Teacher', 'Pastor', 'Elder', 'Executive Director', 'Admin']
+      );
+    }
+
+    // =========================================================================
+    // 1. USERS & PROFILES
+    // =========================================================================
+    match /users/{userId} {
+      // Members can read their own profile; Leadership can read all member profiles
+      allow read: if isUser(userId) || isLeadership();
+      
+      // Initial registration: user can create their own doc with default role
+      allow create: if isUser(userId) && (
+        !('role' in request.resource.data) ||
+        request.resource.data.role in ['Member', 'Visitor'] ||
+        isLeadership()
+      );
+
+      // Members can update non-sensitive personal fields
+      // Role, verification, and member_id can only be updated by Leadership
+      allow update: if isUser(userId) && (
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'is_verified', 'member_id'])
+      ) || isLeadership();
+
+      allow delete: if isLeadership();
+    }
+
+    // =========================================================================
+    // 2. TITHES, OFFERINGS & SACRED GIVING
+    // =========================================================================
+    match /tithes/{titheId} {
+      // Member can read their own tithe records; Deacons/Leadership can view all for audit
+      allow read: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid ||
+        isDeaconOrAbove()
+      );
+
+      // Member can submit a tithe payment or pledge record tied to their UID
+      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
+
+      // Only deacons/leadership can update status (e.g. from 'pending' to 'completed')
+      allow update: if isDeaconOrAbove();
+      allow delete: if false; // Strict financial immutability
+    }
+
+    // =========================================================================
+    // 3. STEWARDSHIP KITTY LOANS & GUARANTORS (Phase 2)
+    // =========================================================================
+    match /loans/{loanId} {
+      // Member can read their own loan; designated guarantors can view; leadership can view all
+      allow read: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid ||
+        resource.data.guarantor_uid == request.auth.uid ||
+        isLeadership()
+      );
+
+      // Members can apply for a loan
+      allow create: if isAuthenticated() && 
+        request.resource.data.user_id == request.auth.uid &&
+        request.resource.data.status == 'pending';
+
+      // Designated guarantor can sign off; Leadership can approve/reject
+      allow update: if isAuthenticated() && (
+        (resource.data.guarantor_uid == request.auth.uid && 
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['guarantor_status', 'guarantor_signed_at'])) ||
+        isLeadership()
+      );
+
+      allow delete: if false; // Audit logs must not be purged
+    }
+
+    // Loan repayments
+    match /loan_repayments/{repaymentId} {
+      allow read: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid ||
+        isLeadership()
+      );
+      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
+      allow update, delete: if isLeadership();
+    }
+
+    // =========================================================================
+    // 4. BUILDING & LAND FUND PLEDGES
+    // =========================================================================
+    match /pledges/{pledgeId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
+      allow update: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid || isDeaconOrAbove()
+      );
+      allow delete: if isLeadership();
+    }
+
+    // =========================================================================
+    // 5. SMART ATTENDANCE (NFC / QR CODE) (Phase 3)
+    // =========================================================================
+    match /attendance/{attendanceId} {
+      allow read: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid || isDeaconOrAbove()
+      );
+      allow create: if isAuthenticated() && (
+        request.resource.data.user_id == request.auth.uid || isDeaconOrAbove()
+      );
+      allow update, delete: if isLeadership();
+    }
+
+    // =========================================================================
+    // 6. CATEGORY-SPECIFIC CHANNELS & FELLOWSHIP MESSAGING
+    // =========================================================================
+    match /channels/{channelId} {
+      allow read: if isAuthenticated();
+      allow write: if isLeadership();
+
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && (
+          channelId in ['general', 'youth', 'announcements', 'community'] ||
+          isLeadership() ||
+          (channelId == 'pastors_elders' && isLeadership()) ||
+          (channelId == 'deacons' && isDeaconOrAbove()) ||
+          (channelId in ['women_dorkas', 'choir'])
+        );
+
+        allow create: if isAuthenticated() && 
+          request.resource.data.sender_id == request.auth.uid;
+
+        allow update, delete: if isAuthenticated() && (
+          resource.data.sender_id == request.auth.uid || isLeadership()
+        );
+      }
+    }
+
+    // =========================================================================
+    // 7. CHURCH ASSETS & DEACON INVENTORY
+    // =========================================================================
+    match /assets/{assetId} {
+      allow read: if isAuthenticated();
+      allow write: if isDeaconOrAbove();
+    }
+
+    // =========================================================================
+    // 8. TAMPER-PROOF ELECTIONS & VOTING
+    // =========================================================================
+    match /elections/{electionId} {
+      allow read: if isAuthenticated();
+      allow write: if isLeadership();
+
+      match /votes/{voteId} {
+        allow read: if isLeadership();
+
+        // Voter can only cast a vote for themselves (voteId == auth.uid)
+        // Immutable once cast
+        allow create: if isAuthenticated() &&
+          request.auth.uid == voteId &&
+          request.resource.data.voter_id == request.auth.uid;
+        allow update, delete: if false;
+      }
+    }
+
+    // =========================================================================
+    // 9. SUNDAY SCHOOL, PARENT PICKUP CODES & MILESTONES (Phase 4)
+    // =========================================================================
+    match /sunday_school_lessons/{lessonId} {
+      allow read: if isAuthenticated();
+      allow write: if isSundaySchoolTeacher();
+    }
+
+    match /pickup_authorizations/{pickupId} {
+      allow read: if isAuthenticated() && (
+        resource.data.parent_uid == request.auth.uid || isSundaySchoolTeacher()
+      );
+      allow create: if isAuthenticated() && 
+        request.resource.data.parent_uid == request.auth.uid;
+      allow update: if isSundaySchoolTeacher();
+      allow delete: if isAuthenticated() && resource.data.parent_uid == request.auth.uid;
+    }
+
+    match /believer_milestones/{milestoneId} {
+      allow read: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid || isLeadership()
+      );
+      allow write: if isLeadership();
+    }
+
+    // =========================================================================
+    // 10. ANONYMOUS PASTORAL COUNSELING
+    // =========================================================================
+    match /counseling_requests/{requestId} {
+      // Only Pastoral leadership can read counseling queries
+      allow read: if isLeadership();
+      // Anonymous submission allowed
+      allow create: if true;
+      allow update, delete: if isLeadership();
+    }
+
+    // =========================================================================
+    // 11. COMMUNITY OUTREACH (FARD CBO) & VOLUNTEERS
+    // =========================================================================
+    match /community_projects/{projectId} {
+      allow read: if true; // Public transparency
+      allow write: if isLeadership();
+    }
+
+    match /volunteers/{volunteerId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && request.resource.data.user_id == request.auth.uid;
+      allow update, delete: if isAuthenticated() && (
+        resource.data.user_id == request.auth.uid || isLeadership()
+      );
+    }
+
+    // =========================================================================
+    // 12. BRANCHES, EVENTS, BULLETINS & ANNOUNCEMENTS (Phase 5)
+    // =========================================================================
+    match /branches/{branchId} {
+      allow read: if true; // Public branch locator (Kakamega, Nairobi, etc.)
+      allow write: if isLeadership();
+    }
+
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if isLeadership();
+
+      match /rsvps/{rsvpId} {
+        allow read: if isAuthenticated();
+        allow create, update: if isAuthenticated() && request.auth.uid == rsvpId;
+        allow delete: if isAuthenticated() && request.auth.uid == rsvpId;
+      }
+    }
+
+    match /bulletins/{bulletinId} {
+      allow read: if true;
+      allow write: if isLeadership();
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if true;
+      allow write: if isLeadership();
+    }
+
+    // =========================================================================
+    // 13. OFFLINE MUTATION AUDIT & SYNC QUEUES
+    // =========================================================================
+    match /offline_sync_logs/{logId} {
+      allow read: if isLeadership();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+  }
+}
